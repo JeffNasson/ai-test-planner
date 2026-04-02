@@ -1,0 +1,24 @@
+Hard: Coping with loss and uncertainty is emotionally challenging.
+
+Here's a plan:
+-Reach out to supportive friends or family.
+-Create a daily routine to maintain structure.
+-Explore new job opportunities or consider learning new skills.
+
+--- New Task ---
+Task: Something super duper hard
+Hard: requires extensive knowledge and skills beyond normal capabilities.
+
+Here's a plan:
+-Identify the core problem precisely.
+-Break it down into smaller, manageable parts.
+-Develop a solution by integrating those parts logically.
+
+--- 2026-04-01 14:40:19.660134 ---
+Task: an insurmountable task
+Hard: it involves overcoming seemingly impossible obstacles.
+
+Here's a plan:
+-Identify the core challenge.
+-Break the challenge into smaller parts.
+-Develop a plan to tackle each part.
