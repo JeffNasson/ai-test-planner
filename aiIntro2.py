@@ -4,8 +4,11 @@ import os
 import json
 import time
 from datetime import datetime
-# import list_file_intro_test as file_helper
 DEBUG = False
+
+PLANS_DIR = "plans"
+if not os.path.exists(PLANS_DIR):
+    os.makedirs(PLANS_DIR)
 
 load_dotenv()
 client = OpenAI()
@@ -16,8 +19,8 @@ MAX10 = 10
 
 # Search for list files
 def list_plans():
-    # files returns a list of all files in the current directory that start with "plan_"
-    files = [f for f in os.listdir() if f.startswith("plan_")]
+    # files returns a list of all files in the plans directory that start with "plan_"
+    files = [f for f in os.listdir(PLANS_DIR) if f.startswith("plan_")]
     
     # if not files checks if the list is empty. If it is empty, it prints "No deathstar plans found." and returns an empty list. This is to handle the case where there are no plans saved yet.
     if not files:
@@ -34,8 +37,9 @@ def list_plans():
 
 # read the file
 def read_plan(filename:str):
+    filepath = os.path.joib(PLANS_DIR, filename)
     try:
-        with open(filename,"r") as file:
+        with open(filepath,"r") as file:
             content=file.read()
             print("\n--- Plan Content ---\n")
             print(content)
@@ -109,6 +113,7 @@ def job_helper(task: str) -> str:
 
         safe_task = "".join(character for character in task.lower() if character.isalnum() or character == " ").strip().replace(" ","_")[:50] # remove special characters, replace spaces with underscores, and limit filename length to 50 characters
         filename = f"plan_{safe_task}.txt"
+        filename = os.path.join(PLANS_DIR, f"plan_{safe_task}.txt") # save the file in the plans directory
 
         # opens a file called plan.txt in write mode. If the file doesn't exist, it will be created. If it does exist, it will be overwritten.
         # "w" writes to the file, "a" appends to the file, "r" reads the file. We use a context manager (the with statement) to ensure that the file is properly closed after we're done writing to it.
