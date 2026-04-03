@@ -7,7 +7,7 @@ from datetime import datetime
 
 DEBUG = False
 
-PLANS_DIR = "plans"
+PLANS_DIR = "test_cases"
 if not os.path.exists(PLANS_DIR):
     os.makedirs(PLANS_DIR)
 
@@ -19,7 +19,7 @@ MODEL = "gpt-4o-mini"
 
 # Search for list files
 def list_plans():
-    # files returns a list of all files in the plans directory that start with "plan_"
+    # files returns a list of all files in the test_plans directory that start with "plan_"
     files = [f for f in os.listdir(PLANS_DIR) if f.startswith("plan_")]
     
     # if not files checks if the list is empty. If it is empty, it prints "No deathstar plans found." and returns an empty list. This is to handle the case where there are no plans saved yet.
@@ -140,7 +140,7 @@ def job_helper(task: str) -> str:
 
     safe_task = "".join(character for character in task.lower() if character.isalnum() or character == " ").strip().replace(" ","_")[:50] # remove special characters, replace spaces with underscores, and limit filename length to 50 characters
     filename = f"plan_{safe_task}.txt"
-    filename = os.path.join(PLANS_DIR, f"plan_{safe_task}.txt") # save the file in the plans directory
+    filename = os.path.join(PLANS_DIR, f"plan_{safe_task}.txt") # save the file in the test_plans directory
 
         # opens a file called plan.txt in write mode. If the file doesn't exist, it will be created. If it does exist, it will be overwritten.
         # "w" writes to the file, "a" appends to the file, "r" reads the file. We use a context manager (the with statement) to ensure that the file is properly closed after we're done writing to it.
