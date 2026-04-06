@@ -65,12 +65,16 @@ def break_down_task(task: str) -> str:
         input = f"""
         You are a QA engineer. 
 
-        Given the follow feature or scenario, generate exactly 2 test cases.
+        Given the following feature or scenario, generate exactly 2 test cases.
+
+        1 positive test case (valid behavior)
+        1 negative test case (invalid behavior or edge case)
 
         Return only valid JSON in this format: {{
             "test_cases":[
                 {{
                     "title":"short test case name",
+                    "type": "positive or negative",
                     "steps":["step 1","step 2","step 3"],
                     "expected": "expected result of test case
                 }}
@@ -78,8 +82,10 @@ def break_down_task(task: str) -> str:
         }}
 
         Rules:
-        - Exactly 3 test cases
-        - Each test case must have 3 steps
+        - Exactly 2 test cases
+        - One must be positive
+        - One must be negative
+        - Each test case can have up to a maximum of 3 steps
         - Steps must be clear user actions in one sentence each
         - Expected result must be one short sentence describing the expected outcome of the test case
         - No extra text outside JSON
@@ -130,7 +136,7 @@ def job_helper(task: str) -> str:
         return "Error: AI response was not valid JSON"
     
     for case in test_cases:
-        print(f"\nTest Case: {case['title']}")
+        print(f"\nTest Case ({case['type']}): {case['title']}")
         input("Press Enter to see steps...")
 
         for step in case["steps"]:
@@ -150,7 +156,7 @@ def job_helper(task: str) -> str:
         file.write(f"Task: {task}\n")
         file.write(f"{analysis}\n\n=== Test Cases ===\n")
         for case in test_cases:
-            file.write(f"\nTest Case: {case['title']}\n")
+            file.write(f"\nTest Case ({case['type']}): {case['title']}\n")
             for step in case["steps"]:
                 file.write(f"- {step}\n")
             file.write(f"Expected: {case['expected']}\n")
