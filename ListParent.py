@@ -16,6 +16,16 @@ client = OpenAI()
 MODEL = "gpt-4o-mini"
 
 
+# PASS/FAIL simulator
+def run_assertion(assertion: str):
+    print(f"Running assertion: {assertion}")
+
+    if "error" in assertion.lower():
+        print("Result: PASS\n")
+    elif "dashboard" in assertion.lower():
+        print("Result: PASS\n")
+    else:
+        print("Result: UNKNOWN\n")
 
 # Search for list files
 def list_plans():
@@ -65,34 +75,38 @@ def break_down_task(task: str) -> str:
         input = f"""
         You are a QA engineer. 
 
-        Given the following feature or scenario, generate exactly 2 test cases.
+        Given the following feature or scenario, generate exactly 3 test cases.
 
         1 positive test case (valid behavior)
-        1 negative test case (invalid behavior or edge case)
+        1 negative test case (invalid behavior)
+        1 edge case (boundary or unusual condition)
 
         Return only valid JSON in this format: {{
             "test_cases":[
                 {{
                     "title":"short test case name",
-                    "type": "positive or negative",
+                    "type": "positive, negative, or edge",
                     "steps":["step 1","step 2","step 3"],
-                    "expected": "expected result of test case
+                    "expected": "expected result of test case",
+                    "assertion": "What should be verified"
                 }}
             ]
         }}
 
         Rules:
-        - Exactly 2 test cases
+        - Exactly 3 test cases
         - One must be positive
         - One must be negative
+        - One must be an edge case
         - Each test case can have up to a maximum of 3 steps
+        - Assertion must describe what is checked
         - Steps must be clear user actions in one sentence each
         - Expected result must be one short sentence describing the expected outcome of the test case
         - No extra text outside JSON
 
         Scenario: {task}
         """,
-        max_output_tokens=150
+        max_output_tokens=350
     )
 
     print("Done breaking task down!")
@@ -126,23 +140,32 @@ def job_helper(task: str) -> str:
         print("\n--- FINAL JSON BEING PARSED ---\n")
         print(breakdown)
         print(f"\nTYPE: {type(breakdown)}")
+    
+    if not breakdown.strip().endswith("}"):
+        print("Incomplete AI response, likely token limit hit.\n")
+        print(breakdown)
+        return "Error: Incomplete AI response."
 
     try:
         data = json.loads(breakdown) #json.loads() takes json data and deserializes it into a python object (in this case, a dictionary). We can then access the "steps" key to get the list of steps.
-        test_cases = data["test_cases"][:2] # take only the first 2 test cases to ensure we don't exceed our token limit when printing steps. In a real application, you would want to handle this more robustly, perhaps by paginating the output or allowing the user to select which test cases to view.
+        test_cases = data.get("test_cases", [])[:3] # take only the first 3 test cases to ensure we don't exceed our token limit when printing steps. Return an empty array if test_cases does not exist. In a real application, you would want to handle this more robustly, perhaps by paginating the output or allowing the user to select which test cases to view.
     except json.JSONDecodeError:
         print("Failed to parse AI response as JSON. \n")
         print(breakdown)
         return "Error: AI response was not valid JSON"
     
     for case in test_cases:
+        if "assertion" not in case:
+            print("Missing assertion in test case")
+            return "Invalid test case data"
         print(f"\nTest Case ({case['type']}): {case['title']}")
-        input("Press Enter to see steps...")
+        input("\nPress Enter to see steps...\n")
 
-        for step in case["steps"]:
-            print(f"- {step}")
+        for i, step in enumerate(case["steps"], start = 1):
+            print(f"{i}. {step}")
             time.sleep(.5) # add a small delay between steps for better readability. (Don't use in prod for obvious reasons, but it helps with readability in this demo.)
         print(f"Expected: {case['expected']}\n")
+        print(f"Assertion: {case['assertion']}\n")
 
     safe_task = "".join(character for character in task.lower() if character.isalnum() or character == " ").strip().replace(" ","_")[:50] # remove special characters, replace spaces with underscores, and limit filename length to 50 characters
     filename = f"plan_{safe_task}.txt"
@@ -157,9 +180,10 @@ def job_helper(task: str) -> str:
         file.write(f"{analysis}\n\n=== Test Cases ===\n")
         for case in test_cases:
             file.write(f"\nTest Case ({case['type']}): {case['title']}\n")
-            for step in case["steps"]:
-                file.write(f"- {step}\n")
+            for i, step in enumerate(case["steps"], start=1):
+                file.write(f"{i}. {step}\n")
             file.write(f"Expected: {case['expected']}\n")
+            file.write(f"Assertion: {case['assertion']}\n")
 
     return ""
 
