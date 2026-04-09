@@ -4,6 +4,8 @@ import os
 import json
 import time
 from datetime import datetime
+from playwright.sync_api import sync_playwright
+from assertion_runner import run_real_assertion
 
 DEBUG = False
 
@@ -64,7 +66,7 @@ def read_plan(filename:str):
 
 
 
-# Transformation function which is called if the task is hard, to break it down into smaller steps.
+# This function takes a task description as input and uses the OpenAI API to generate test cases based on that task. It sends a prompt to the model asking it to create 3 test cases (positive, negative, and edge) in a specific JSON format. The response is then cleaned and returned as a string. The function also includes debug prints to help with troubleshooting and understanding the AI's response.
 def break_down_task(task: str) -> str:
     print("Breaking task down...")
     response = client.responses.create(
@@ -125,6 +127,33 @@ def break_down_task(task: str) -> str:
 
     return cleaned
 
+def run_test_cases(test_cases):
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as sp:
+        browser = sp.chromium.launch(headless=False)
+
+        for case in test_cases:
+            print(f"\nTest Case ({case['type']}): {case['title']}")
+            input("\nPress Enter to see steps...\n")
+
+            context = browser.new_context() # create a new browser context for each test case to ensure isolation
+            page = context.new_page() # create a new page within the context
+
+            page.goto("https://www.google.com") # temporary url
+
+            for i, step in enumerate(case["steps"], start =1):
+                print(f"{i}. {step}")
+                time.sleep(.5) # add a small delay between steps for better readability. (Don't use in prod for obvious reasons, but it helps with readability in this demo.)
+            print(f"Expected: {case['expected']}\n")
+            print(f"Assertion: {case['assertion']}\n")
+
+            try:
+                run_real_assertion(page, case['assertion'])
+            except AssertionError as e:
+                print(f"\nFail: {e}\n") # If test fails, print a failure message and execute the next test case instead of stopping the whole process.
+            context.close() # close the context to clean up after the test case
+        browser.close() # close the browser after all test cases have been executed
 
 def job_helper(task: str) -> str:
     print("\nGenerating test cases...")
@@ -149,19 +178,7 @@ def job_helper(task: str) -> str:
         print(breakdown)
         return "Error: AI response was not valid JSON"
     
-    for case in test_cases:
-        if "assertion" not in case:
-            print("Missing assertion in test case")
-            return "Invalid test case data"
-        print(f"\nTest Case ({case['type']}): {case['title']}")
-        input("\nPress Enter to see steps...\n")
-
-        for i, step in enumerate(case["steps"], start = 1):
-            print(f"{i}. {step}")
-            time.sleep(.5) # add a small delay between steps for better readability. (Don't use in prod for obvious reasons, but it helps with readability in this demo.)
-        print(f"Expected: {case['expected']}\n")
-        print(f"Assertion: {case['assertion']}\n")
-        run_assertion(case['assertion']) # simulate running the assertion and print pass/fail result
+    run_test_cases(test_cases)
 
     safe_task = "".join(character for character in task.lower() if character.isalnum() or character == " ").strip().replace(" ","_")[:50] # remove special characters, replace spaces with underscores, and limit filename length to 50 characters
     filename = f"plan_{safe_task}.txt"
