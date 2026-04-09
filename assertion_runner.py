@@ -8,6 +8,6 @@ def run_real_assertion(page, assertion: str):
         assert page.locator("text=Error").count() > 0, "Error message not found"
 
     else:
-        print("No automation mapping for assertion")
+        print(f"Skipped: No mapping for assertion → {assertion}")
 
     print("PASS")
