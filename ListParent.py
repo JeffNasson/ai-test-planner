@@ -18,21 +18,6 @@ client = OpenAI()
 MODEL = "gpt-4o-mini"
 
 
-# PASS/FAIL simulator
-def run_assertion(assertion: str):
-    print(f"Running assertion: {assertion}")
-
-    # simulate different outcomes
-    simulated_result = "dashboard" if "dashboard" in assertion.lower() else "error"
-
-    if "dashboard" in assertion.lower() and simulated_result == "dashboard":
-        print("Result: PASS\n")
-
-    elif "error" in assertion.lower() and simulated_result == "error":
-        print("Result: PASS\n")
-
-    else:
-        print("Result: FAIL\n")
 
 # Search for list files
 def list_plans():
