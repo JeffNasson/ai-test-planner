@@ -50,9 +50,7 @@ def read_plan(filename:str):
     input("\nPress Enter to continue...")
 
 
-
 # Houses prompting logic
-# This function takes a task description as input and uses the OpenAI API to generate test cases based on that task. It sends a prompt to the model asking it to create 3 test cases (positive, negative, and edge) in a specific JSON format. The response is then cleaned and returned as a string. The function also includes debug prints to help with troubleshooting and understanding the AI's response.
 def break_down_task(task: str) -> str:
     print("Breaking task down...")
     response = client.responses.create(
@@ -72,6 +70,10 @@ def break_down_task(task: str) -> str:
                     "title":"short test case name",
                     "url": "https://www.example.com/login",
                     "type": "positive, negative, or edge",
+                    "inputs":{
+                        "username": "string",
+                        "password": "string"
+                    },
                     "steps":["step 1","step 2","step 3"],
                     "expected": "expected result of test case",
                     "assertion": "What should be verified"
@@ -88,6 +90,10 @@ def break_down_task(task: str) -> str:
         - Assertion must describe what is checked
         - Steps must be clear user actions in one sentence each
         - Expected result must be one short sentence describing the expected outcome of the test case
+        - Inputs must match the test type:
+            - Positive -> valid credentials
+            - Negative -> invalid credentials
+            - Edge -> empty or boundary values
         - No extra text outside JSON
 
         Scenario: {task}
