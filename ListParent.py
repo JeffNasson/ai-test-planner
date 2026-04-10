@@ -19,6 +19,14 @@ MODEL = "gpt-4o-mini"
 
 
 
+# Simulate API create user function. In an enterprise application we want to do this via internal API and send credentials securely
+def create_test_user():
+    return {
+        "username": "tomsmith",
+        "password": "SuperSecretPassword!"
+    }
+
+
 # Search for test plan files
 def list_plans():
     # files returns a list of all files in the test_plans directory that start with "plan_"
@@ -148,9 +156,10 @@ def run_test_cases(test_cases):
             try:
                 # Set inputs based on test case type
                 inputs = case.get("inputs", {})
-                if case['type'] == "positive": # For the positive test case, use known valid credentials. In enterprise environments, we want to generate a user via internal API and send the credentials securely.
-                    username = "tomsmith"
-                    password = "SuperSecretPassword!"
+                if case['type'] == "positive": 
+                    user = create_test_user()
+                    username = user["username"]
+                    password = user["password"]
                 else:
                     username = inputs.get("username","")
                     password = inputs.get("password","")
