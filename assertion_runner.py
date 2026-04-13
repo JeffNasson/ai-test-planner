@@ -1,4 +1,5 @@
-def run_real_assertion(page, assertion: dict):
+def run_real_assertion(page, assertion: dict): # page is the browser tab/page object from Playwright. Assertion is the structured data dictionary from the AI prompt
+
     assertion_type = assertion.get("type") # This is the type of assertion to perform, such as "url_contains", "element_visible", or "text_present". The actual types and their handling would depend on how you want to structure your assertions and what you want to verify in your tests.
     
     value = assertion.get("value") # This is the value to check for in the assertion. For example, if the assertion type is "url_contains", this would be the substring that should be present in the URL. If the assertion type is "element_visible", this could be a boolean indicating whether the element should be visible or not. If the assertion type is "text_present", this would be the text that should be present on the page.
@@ -7,7 +8,10 @@ def run_real_assertion(page, assertion: dict):
 
     # Perform the assertion based on its type
     if assertion_type == "url_contains":
-        assert value in page.url, f"Expected {value} in url, got {page}" # This checks that the specified value is present in the current page URL.
+        # # Normalize AI expectations
+        # if value == "dashboard":
+        #     value = "secure" # This is an example of normalizing AI expectations. If the AI expects "dashboard" in the URL for a successful login, but the actual application uses "secure", we can adjust the expected value accordingly to prevent false negatives in our tests.
+        assert value in page.url, f"Expected {value} in url, got {page.url}" # This checks that the specified value is present in the current page URL.
     
     elif assertion_type == "element_visible":
         assert page.locator(locator).is_visible(), f"Element {locator} not visible" # This checks that the element specified by the locator is visible on the page.
