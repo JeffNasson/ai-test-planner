@@ -47,9 +47,12 @@ def generate_test_cases(task: str) -> str:
         - One must be negative
         - One must be an edge case
         - Each test case can have up to a maximum of 3 steps
-        - Assertion must describe what is checked
+        - Assertion must describe what is checked and match actual system behavior
+            - Empty fields -> check for "Your username is invalid!"
+            - Use '#flash' as the locator for error messages on this page
         - Steps must be clear user actions in one sentence each
-        - Expected result must be one short sentence describing the expected outcome of the test case
+        - Expected result field must be one short sentence describing the ideal behavior of the test case
+            - Empty fields -> "User should see required field validation"
         - Inputs must match the test type:
             - Positive -> valid credentials
             - Negative -> invalid credentials
@@ -59,9 +62,9 @@ def generate_test_cases(task: str) -> str:
             - User "/secure" for url_contains assertions
         - Each test case must have a unique and correct assertion value
         - Edge cases (empty fields) must not reuse invalid credential messages
-        - Use realistic messages for each scenario:
+        - Use realistic messages for each scenario based on actual system behavior:
             - Invalid login -> "Your username is invalid!"
-            - Empty fields -> "Your username is required!"
+            - Empty fields -> "Your username is invalid!" (test site limitation, but should be categorized as edge case)
         - No extra text outside JSON
 
         Scenario: {task}
