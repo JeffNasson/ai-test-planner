@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 from assertion_runner import run_real_assertion
+from ai_engine import generate_test_cases
 
 DEBUG = False
 
@@ -59,67 +60,11 @@ def read_plan(filename:str):
     input("\nPress Enter to continue...")
 
 
-# Houses prompting logic, sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
+# Sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
 def break_down_task(task: str) -> str:
     print("Breaking task down...")
-    response = client.responses.create(
-        model=MODEL,
-        input = f"""
-        You are a QA engineer. 
 
-        Given the following feature or scenario, generate exactly 3 test cases.
-
-        1 positive test case (valid behavior)
-        1 negative test case (invalid behavior)
-        1 edge case (boundary or unusual condition)
-
-        Return only valid JSON in this format: {{
-            "test_cases":[
-                {{
-                    "title": "short test case name",
-                    "url": "https://www.example.com/login",
-                    "type": "positive, negative, or edge",
-                    "inputs": {{
-                        "username": "string",
-                        "password": "string"
-                    }},
-                    "steps": ["step 1","step 2","step 3"],
-                    "expected": "expected result of test case",
-                    "assertion": {{
-                        "type": "url_contains | element_visible | text_present",
-                        "value": "what to check",
-                        "locator": "optional css selector"
-                    }}
-                }}
-            ]
-        }}
-
-        Rules:
-        - Exactly 3 test cases
-        - One must be positive
-        - One must be negative
-        - One must be an edge case
-        - Each test case can have up to a maximum of 3 steps
-        - Assertion must describe what is checked
-        - Steps must be clear user actions in one sentence each
-        - Expected result must be one short sentence describing the expected outcome of the test case
-        - Inputs must match the test type:
-            - Positive -> valid credentials
-            - Negative -> invalid credentials
-            - Edge -> empty or boundary values
-        - For the login page https://the-internet.herokuapp.com/login:
-            - Success login redirects to "/secure"
-            - User "/secure" for url_contains assertions
-        - No extra text outside JSON
-
-        Scenario: {task}
-        """,
-        max_output_tokens=450
-    )
-
-    print("Done breaking task down!")
-    print(f"Tokens used: {response.usage}")
-    raw_text = response.output[0].content[0].text
+    raw_text = generate_test_cases(task)
 
     if DEBUG:
         print("\n--- RAW AI RESPONSE ---\n")
