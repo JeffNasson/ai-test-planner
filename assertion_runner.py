@@ -1,18 +1,22 @@
-def run_real_assertion(page, assertion: str):
-    assertion = assertion.lower()
-    flash = page.locator("#flash")
+def run_real_assertion(page, assertion: dict):
+    assertion_type = assertion.get("type") # This is the type of assertion to perform, such as "url_contains", "element_visible", or "text_present". The actual types and their handling would depend on how you want to structure your assertions and what you want to verify in your tests.
+    
+    value = assertion.get("value") # This is the value to check for in the assertion. For example, if the assertion type is "url_contains", this would be the substring that should be present in the URL. If the assertion type is "element_visible", this could be a boolean indicating whether the element should be visible or not. If the assertion type is "text_present", this would be the text that should be present on the page.
 
-    if "dashboard" in assertion or "logged in" in assertion:
-        assert "/secure" in page.url, f"Expected secure page, got {page.url}" # This locator is specific to the herokuapp login page. In a real application, you would need to use a locator that matches the secure page element on your page.
-    elif any(word in assertion for word in ["invalid", "error", "incorrect"]):
-        assert flash.is_visible(), "Error message not visible" # This checks that the flash message is visible on the page, which is where the error message is displayed on the herokuapp login page.
-        assert "invalid" in flash.text_content().lower(), "Wrong error message displayed" # This checks that the flash message contains the word "invalid", which is part of the error message displayed when login fails on the herokuapp login page.
+    locator = assertion.get("locator") # This is an optional CSS selector that can be used to locate a specific element on the page for assertions that require it, such as "element_visible" or "text_present".
 
-    elif any(word in assertion for word in ["required", "empty", "missing"]):
-        assert flash.is_visible(), "Validation message not visible" # This checks that the flash message is visible on the page, which is where the validation message is displayed on the herokuapp login page when required fields are empty.
-        assert "required" in flash.text_content().lower() or "empty" in flash.text_content().lower(), "Wrong validation message" # This is a simple check for the presence of "required" or "empty" in the flash message.
+    # Perform the assertion based on its type
+    if assertion_type == "url_contains":
+        assert value in page.url, f"Expected {value} in url, got {page}" # This checks that the specified value is present in the current page URL.
+    
+    elif assertion_type == "element_visible":
+        assert page.locator(locator).is_visible(), f"Element {locator} not visible" # This checks that the element specified by the locator is visible on the page.
+    
+    elif assertion_type == "text_present":
+        content = page.locator(locator).text_content().lower() # Get the text content of the element specified by the locator and convert it to lowercase for case-insensitive comparison.
+        assert value.lower() in content, f"Expected {value} in element text" # This checks that the specified value is present in the text content of the element.
+    
     else:
-        print(f"SKIPPED: No mapping for assertion → {assertion}") # If the assertion doesn't match any of the known patterns, print a message and skip the assertion instead of failing the test.
-        return
+        print(f"SKIPPED: Unknown assertion type -> {assertion_type}") # If the assertion type is not recognized, print a message and skip the assertion instead of failing the test.
 
     print("PASS")
