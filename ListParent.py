@@ -85,7 +85,11 @@ def break_down_task(task: str) -> str:
                     }},
                     "steps": ["step 1","step 2","step 3"],
                     "expected": "expected result of test case",
-                    "assertion": "What should be verified"
+                    "assertion": {{
+                        "type": "url_contains | element_visible | text_present",
+                        "value": "what to check",
+                        "locator": "optional css selector"
+                    }}
                 }}
             ]
         }}
