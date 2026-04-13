@@ -107,6 +107,9 @@ def break_down_task(task: str) -> str:
             - Positive -> valid credentials
             - Negative -> invalid credentials
             - Edge -> empty or boundary values
+        - For the login page https://the-internet.herokuapp.com/login:
+            - Success login redirects to "/secure"
+            - User "/secure" for url_contains assertions
         - No extra text outside JSON
 
         Scenario: {task}

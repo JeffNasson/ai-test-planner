@@ -8,9 +8,6 @@ def run_real_assertion(page, assertion: dict): # page is the browser tab/page ob
 
     # Perform the assertion based on its type
     if assertion_type == "url_contains":
-        # # Normalize AI expectations
-        # if value == "dashboard":
-        #     value = "secure" # This is an example of normalizing AI expectations. If the AI expects "dashboard" in the URL for a successful login, but the actual application uses "secure", we can adjust the expected value accordingly to prevent false negatives in our tests.
         assert value in page.url, f"Expected {value} in url, got {page.url}" # This checks that the specified value is present in the current page URL.
     
     elif assertion_type == "element_visible":
