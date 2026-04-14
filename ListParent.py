@@ -18,6 +18,10 @@ RESULTS_DIR = "test_results"
 if not os.path.exists(RESULTS_DIR):
     os.makedirs(RESULTS_DIR)
 
+RESULTS_JSON_DIR = "test_results_json"
+if not os.path.exists(RESULTS_JSON_DIR):
+    os.makedirs(RESULTS_JSON_DIR)
+
 load_dotenv()
 client = OpenAI()
 MODEL = "gpt-4o-mini"
@@ -177,6 +181,30 @@ def run_test_cases(test_cases):
         f.write(f"Errors: {errors}\n")
         f.write(f"Pass Rate: {pass_rate:.2f}%\n")
     print(f"\nResults save to {filename}")
+
+    # Save results file to JSON format for easier parsing in an enterprise application. This allows for integration with other tools, such as dashboards or test management systems, that can consume JSON data.
+    base_name = os.path.basename(filename).replace(".txt",".json")
+    json_filename = os.path.join(RESULTS_JSON_DIR, base_name)
+
+    data = {
+        "results": [
+            {
+                "status": status,
+                "title": title
+            }
+            for status, title in results
+        ],
+        "metrics":{
+            "total": total,
+            "passed": passed,
+            "failed": failed,
+            "errors": errors,
+            "pass_rate": pass_rate
+        }
+    }
+    with open(json_filename,"w") as f:
+        json.dump(data, f, indent=4)
+    print(f"Results saved to {json_filename}")
 
 
 # Main helper function that orchestrates the workflow of the application. It does the following:
