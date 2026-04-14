@@ -86,6 +86,8 @@ def break_down_task(task: str) -> str:
 def run_test_cases(test_cases):
     from playwright.sync_api import sync_playwright
 
+    results = []
+
     with sync_playwright() as sp:
         browser = sp.chromium.launch(headless=False)
 
@@ -122,11 +124,22 @@ def run_test_cases(test_cases):
                 # Submit form
                 page.click("button[type='submit']")
 
+                # Run assertions
                 run_real_assertion(page, case['assertion'])
+
+                results.append(("PASS", case['title']))
+
             except AssertionError as e:
                 print(f"\nFail: {e}\n") # If test fails, print a failure message and execute the next test case instead of stopping the whole process.
+                results.append(("FAIL", case['title']))
+            except Exception as e:
+                print(f"\nERROR: {e}\n") # Catch any other unexpected exceptions to prevent crashes and allow the rest of the test cases to run.
+                results.append(("ERROR", case['title']))
             context.close() # close the context to clean up after the test case
         browser.close() # close the browser after all test cases have been executed
+    print("\n=== TEST SUMMARY ===\n")
+    for status, title in results:
+        print(f"{status}: {title}")
 
 
 # Main helper function that orchestrates the workflow of the application. It does the following:
