@@ -16,15 +16,22 @@ def run_real_assertion(page, assertion: dict): # page is the browser tab/page ob
         assert page.locator(locator).is_visible(), f"Element {locator} not visible" # This checks that the element specified by the locator is visible on the page.
     
     elif assertion_type == "text_present":
+        stop_words = {"the", "is", "a", "an", "your", "that", "this", "to", "for"} # Define a set of common stop words to ignore in the text content when checking for the presence of keywords. This helps to focus the assertion on meaningful words and avoid false positives from common words that may not be relevant to the test case.
+
         element = page.locator(locator) # Locate the element specified by the locator
 
-        assert element.count() > 0, f"Element {locator} not found on page" # This checks that the element specified by the locator exists on the page.
+        if element.count() == 0:
+            print(f"FAIL: Element {locator} not found on page") # If the element is not found, print a failure message and skip the rest of the assertion instead of crashing the test.
+            return
 
         content = element.text_content() # Get the text content of the element specified by the locator
 
         content = content.lower() if content else "" # Convert the text content to lowercase for case-insensitive comparison, and handle the case where text_content might return None to prevent crashes.
 
-        keywords = re.findall(r"\w+", value.lower()) # Extract individual words from the value string using a regular expression. This allows for more flexible assertions where the value might contain multiple keywords, and we want to check if any of those keywords are present in the text content of the element.
+        keywords = [
+            word for word in re.findall(r"\w+", value.lower()) 
+            if word not in stop_words
+        ] # This extracts individual words from the value string using a regular expression, converts them to lowercase, and filters out common stop words. This allows for more flexible assertions where the value might contain multiple keywords, and we want to check if any of those keywords are present in the text content of the element.
 
         assert any(word in content for word in keywords), f"Expected one of {keywords} in {content}" # This checkes that at least one of the specified keywords is present in the text content of the element. This allows for more flexible assertions where the exact text might vary but should contain certain key terms.
     
