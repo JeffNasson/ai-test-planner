@@ -14,6 +14,10 @@ PLANS_DIR = "test_cases"
 if not os.path.exists(PLANS_DIR):
     os.makedirs(PLANS_DIR)
 
+RESULTS_DIR = "test_results"
+if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
+
 load_dotenv()
 client = OpenAI()
 MODEL = "gpt-4o-mini"
@@ -137,9 +141,42 @@ def run_test_cases(test_cases):
                 results.append(("ERROR", case['title']))
             context.close() # close the context to clean up after the test case
         browser.close() # close the browser after all test cases have been executed
+    
+    # Calculate metrics
+    total = len(results)
+    passed = sum(1 for status, _ in results if status == "PASS") # Add 1 to the count for any (_) test case in results where the status is "PASS".
+    failed = sum(1 for status, _ in results if status == "FAIL") # Add 1 to the count for any (_) test case in results where the status is "FAIL".
+    errors = sum(1 for status, _ in results if status == "ERROR") # Add 1 to the count for any (_) test case in results where the status is "ERROR".
+
+    pass_rate = (passed/total)*100 if total > 0 else 0 # Calculate pass rate as a percentage. If total is 0, set pass_rate to 0
+    
     print("\n=== TEST SUMMARY ===\n")
     for status, title in results:
         print(f"{status}: {title}")
+    
+    print("\n--- METRICS ---")
+    print(f"Total: {total}")
+    print(f"Passed: {passed}")
+    print(f"Failed: {failed}")
+    print(f"Errors: {errors}")
+    print(f"Pass Rate: {pass_rate:.2f}%")
+
+    # Save results to file
+    filename = os.path.join(RESULTS_DIR, f"test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt") 
+
+    with open(filename,"w") as f:
+        f.write("=== TEST RESULTS ===\n\n")
+
+        for status, title in results:
+            f.write(f"{status}: {title}\n")
+
+        f.write("\n--- METRICS ---\n")
+        f.write(f"Total: {total}\n")
+        f.write(f"Passed: {passed}\n")
+        f.write(f"Failed: {failed}\n")
+        f.write(f"Errors: {errors}\n")
+        f.write(f"Pass Rate: {pass_rate:.2f}%\n")
+    print(f"\nResults save to {filename}")
 
 
 # Main helper function that orchestrates the workflow of the application. It does the following:
@@ -197,7 +234,7 @@ def job_helper(task: str) -> str:
 # Execution
 if __name__ == "__main__":
     while True:
-        print("\n=== Deathstar Planner ===")
+        print("\n=== Test Planner ===")
         print("1. Create new plan")
         print("2. View saved plans")
         print("3. Exit")
