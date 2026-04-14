@@ -102,8 +102,8 @@ def run_test_cases(test_cases):
             context = browser.new_context() # create a new browser context for each test case to ensure isolation
             page = context.new_page() # create a new page within the context
 
-            url = case.get("url","https://www.google.com") # get the url from the test case, or default to google if not provided
-            page.goto("https://the-internet.herokuapp.com/login") # navigate to herokuapp login page for demo purposes. In a real application, you would use the url provided in the test case.
+            url = case.get("url","https://the-internet.herokuapp.com/login") # get the url from the test case, or default to herokuapp login page if not provided. This allows the test cases to specify different urls if needed, while still providing a default for our demo purposes.
+            page.goto(url) # navigate to herokuapp login page for demo purposes. In a real application, you would use the url provided in the test case.
 
             for i, step in enumerate(case["steps"], start =1):
                 print(f"{i}. {step}")
@@ -161,7 +161,7 @@ def run_test_cases(test_cases):
     print(f"Errors: {errors}")
     print(f"Pass Rate: {pass_rate:.2f}%")
 
-    # Save results to file
+    # Save results to txt file
     filename = os.path.join(RESULTS_DIR, f"test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt") 
 
     with open(filename,"w") as f:
