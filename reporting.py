@@ -45,7 +45,7 @@ def generate_report(results):
         f.write(f"Failed: {failed}\n")
         f.write(f"Errors: {errors}\n")
         f.write(f"Pass Rate: {pass_rate:.2f}%\n")
-    print(f"\nResults save to {filename}")
+    print(f"\nResults saved to {filename}")
 
     # Save results file to JSON format for easier parsing in an enterprise application. This allows for integration with other tools, such as dashboards or test management systems, that can consume JSON data.
     base_name = os.path.basename(filename).replace(".txt",".json")
