@@ -12,16 +12,14 @@ from reporting import generate_report
 DEBUG = False
 
 PLANS_DIR = "test_cases"
-if not os.path.exists(PLANS_DIR):
-    os.makedirs(PLANS_DIR)
+os.makedirs(PLANS_DIR, exist_ok=True) # Create the test_cases directory if it doesn't exist.
 
 RESULTS_DIR = "test_results"
-if not os.path.exists(RESULTS_DIR):
-    os.makedirs(RESULTS_DIR)
+os.makedirs(RESULTS_DIR, exist_ok=True) # Create the txt results directory if it doesn't exist
 
 RESULTS_JSON_DIR = "test_results_json"
-if not os.path.exists(RESULTS_JSON_DIR):
-    os.makedirs(RESULTS_JSON_DIR)
+os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the JSON results directory if it doesn't exist
+
 
 load_dotenv()
 client = OpenAI()

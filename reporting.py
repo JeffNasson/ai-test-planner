@@ -2,13 +2,12 @@ from datetime import datetime
 import json
 import os
 
+
 RESULTS_DIR = "test_results"
-if not os.path.exists(RESULTS_DIR):
-    os.makedirs(RESULTS_DIR)
+os.makedirs(RESULTS_DIR, exist_ok=True) # Create the txt results directory if it doesn't exist
 
 RESULTS_JSON_DIR = "test_results_json"
-if not os.path.exists(RESULTS_JSON_DIR):
-    os.makedirs(RESULTS_JSON_DIR)
+os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the JSON results directory if it doesn't exist
 
 def generate_report(results):
     # Calculate metrics
