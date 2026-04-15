@@ -12,13 +12,16 @@ from reporting import generate_report
 DEBUG = False
 
 PLANS_DIR = "test_cases"
-os.makedirs(PLANS_DIR, exist_ok=True) # Create the test_cases directory if it doesn't exist.
+os.makedirs(PLANS_DIR, exist_ok=True) # Create the txt test_cases directory if it doesn't exist.
+
+PLANS_DIR_JSON = "test_cases_json"
+os.makedirs(PLANS_DIR_JSON, exist_ok=True) # Create the json test_cases_json directory
 
 RESULTS_DIR = "test_results"
 os.makedirs(RESULTS_DIR, exist_ok=True) # Create the txt results directory if it doesn't exist
 
 RESULTS_JSON_DIR = "test_results_json"
-os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the JSON results directory if it doesn't exist
+os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the json results directory if it doesn't exist
 
 
 load_dotenv()
@@ -196,6 +199,14 @@ def job_helper(task: str) -> str:
                 file.write(f"{i}. {step}\n")
             file.write(f"Expected: {case['expected']}\n")
             file.write(f"Assertion: {case['assertion']}\n")
+    
+    base_name = os.path.basename(filename).replace(".txt",".json")
+    json_filename = os.path.join(PLANS_DIR_JSON, base_name)
+
+    with open(json_filename,"w") as jf:
+        json.dump(test_cases, jf, indent=4) # Save the test cases in JSON format for easier parsing and integration with other tools in an enterprise application.
+    
+
 
     return ""
 
