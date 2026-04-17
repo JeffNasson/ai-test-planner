@@ -199,8 +199,8 @@ def job_helper(task: str) -> str:
             file.write(f"Expected: {case['expected']}\n")
             file.write(f"Assertion: {case['assertion']}\n")
     
-    base_name = os.path.basename(filename).replace(".txt",".json")
-    json_filename = os.path.join(PLANS_DIR_JSON, base_name)
+    safe_task = "".join(character for character in task.lower() if character.isalnum() or character == " ").strip().replace(" ","_")[:50] # remove special characters, replace spaces with underscores, and limit filename length to 50 characters
+    json_filename = os.path.join(PLANS_DIR_JSON, f"{safe_task}.json") # save the JSON file in the test_cases_json directory with a similar name to the txt file for easy reference
 
     with open(json_filename,"w") as jf:
         # Wrap test cases because we want to maintain the same structure as the original AI response for easier parsing and integration with other tools in an enterprise application. This also allows us to save any additional metadata or fields that may be added to the test cases in the future without needing to change the saving logic.
