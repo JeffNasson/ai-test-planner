@@ -103,7 +103,6 @@ def run_test_cases(test_cases):
 
         for case in test_cases:
             print(f"\nTest Case ({case['type']}): {case['title']}")
-            input("\nPress Enter to see steps...\n")
 
             context = browser.new_context() # create a new browser context for each test case to ensure isolation
             page = context.new_page() # create a new page within the context
@@ -204,7 +203,11 @@ def job_helper(task: str) -> str:
     json_filename = os.path.join(PLANS_DIR_JSON, base_name)
 
     with open(json_filename,"w") as jf:
-        json.dump(test_cases, jf, indent=4) # Save the test cases in JSON format for easier parsing and integration with other tools in an enterprise application.
+        # Wrap test cases because we want to maintain the same structure as the original AI response for easier parsing and integration with other tools in an enterprise application. This also allows us to save any additional metadata or fields that may be added to the test cases in the future without needing to change the saving logic.
+        data = {
+            "test_cases": test_cases
+        }
+        json.dump(data, jf, indent=4) # Save the test cases in JSON format for easier parsing and integration with other tools in an enterprise application.
     
 
 
