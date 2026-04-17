@@ -69,6 +69,10 @@ def read_plan(filename:str):
         print(f"File {filename} not found.")
     input("\nPress Enter to continue...")
 
+def load_test_cases(filepath:str):
+    with open(filepath, "r") as file:
+        data = json.load(file)
+        return data["test_cases"]
 
 # Sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
 def break_down_task(task: str) -> str:
@@ -220,7 +224,8 @@ if __name__ == "__main__":
         print("\n=== Test Planner ===")
         print("1. Create new plan")
         print("2. View saved plans")
-        print("3. Exit")
+        print("3. Run saved test cases")
+        print("4. Exit")
 
         choice = input("Choose an option: ")
 
@@ -251,8 +256,34 @@ if __name__ == "__main__":
                 read_plan(files[index])
             else:
                 print("Invalid selection.")
-
+        
         elif choice == "3":
+            files = [file for file in os.listdir(PLANS_DIR_JSON) if file.endswith(".json")] # List only JSON files in the test_cases_json directory
+
+            if not files:
+                print("No saved test cases found.")
+                continue
+
+            print("\nSaved Test Case Files:")
+            for i, file in enumerate(files, start=1):
+                print(f"{i}. {file}")
+            
+            file_choice = input("\nEnter number to run: ")
+
+            if not file_choice.isdigit():
+                print("Invalid input.")
+                continue
+
+            index = int(file_choice) - 1
+
+            if 0 <= index < len(files):
+                filepath = os.path.join(PLANS_DIR_JSON, files[index])
+                test_cases = load_test_cases(filepath)
+                run_test_cases(test_cases)
+            else:
+                print("Invalid selection.")
+
+        elif choice == "4":
             print("Goodbye")
             break
         
