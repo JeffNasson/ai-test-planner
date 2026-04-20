@@ -1,14 +1,16 @@
-import random
+from api_client import create_api_user
 
 # Simulate API create user function. In an enterprise application we want to do this via internal API and send credentials securely
 def create_positive_test_user():
+    response = create_api_user(valid=True)
     return {
-        "username": "tomsmith",
-        "password": "SuperSecretPassword!"
+        "username": response["username"],
+        "password": response["password"]
     }
 
 def create_negative_test_user():
+    response = create_api_user(valid=False)
     return {
-        "username": f"invalid{random.randint(1000,9999)}",
-        "password": "WrongPassword!"
+        "username": response["username"],
+        "password": response["password"]
     }
