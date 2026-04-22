@@ -1,3 +1,4 @@
+import os
 from playwright.sync_api import sync_playwright
 from assertion_runner import run_real_assertion
 from data_manager import resolve_credentials
@@ -6,9 +7,10 @@ from config import get_base_url
 
 def execute_tests(test_cases):
     results = []
+    HEADLESS = os.getenv("CI", "false") == "true" # Set headless mode based on CI environment variable. This allows for faster execution in CI environments where a UI is not needed, while still allowing for visual debugging when running locally.
 
     with sync_playwright() as sp:
-        browser = sp.chromium.launch(headless=False)
+        browser = sp.chromium.launch(headless = HEADLESS)
 
         for case in test_cases:
             context = browser.new_context() # create a new browser context for each test case

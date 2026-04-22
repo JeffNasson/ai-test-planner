@@ -1,7 +1,7 @@
 {
     "test_cases": [
         {
-            "title": "Successful Login",
+            "title": "Successful login with valid credentials",
             "url": "https://the-internet.herokuapp.com/login",
             "type": "positive",
             "inputs": {
@@ -9,11 +9,11 @@
                 "password": "validPassword"
             },
             "steps": [
-                "Navigate to the login page.",
-                "Enter valid credentials in the username and password fields.",
-                "Click the login button."
+                "Navigate to the login page",
+                "Enter valid username and password",
+                "Click the login button"
             ],
-            "expected": "User should be redirected to the secure area.",
+            "expected": "User should be redirected to the secure area",
             "assertion": {
                 "type": "url_contains",
                 "value": "/secure",
@@ -21,7 +21,7 @@
             }
         },
         {
-            "title": "Invalid Login Attempt",
+            "title": "Failed login with invalid credentials",
             "url": "https://the-internet.herokuapp.com/login",
             "type": "negative",
             "inputs": {
@@ -29,11 +29,11 @@
                 "password": "invalidPassword"
             },
             "steps": [
-                "Navigate to the login page.",
-                "Enter invalid credentials in the username and password fields.",
-                "Click the login button."
+                "Navigate to the login page",
+                "Enter invalid username and password",
+                "Click the login button"
             ],
-            "expected": "User should see an invalid login message.",
+            "expected": "User should see invalid login message",
             "assertion": {
                 "type": "text_present",
                 "value": "Your username is invalid!",
@@ -41,7 +41,7 @@
             }
         },
         {
-            "title": "Empty Fields Submission",
+            "title": "Attempt login with empty fields",
             "url": "https://the-internet.herokuapp.com/login",
             "type": "edge",
             "inputs": {
@@ -49,11 +49,11 @@
                 "password": ""
             },
             "steps": [
-                "Navigate to the login page.",
-                "Leave the username and password fields empty.",
-                "Click the login button."
+                "Navigate to the login page",
+                "Leave username and password fields empty",
+                "Click the login button"
             ],
-            "expected": "User should see required field validation.",
+            "expected": "User should see required field validation",
             "assertion": {
                 "type": "text_present",
                 "value": "Your username is invalid!",

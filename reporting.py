@@ -20,14 +20,26 @@ def generate_report(results):
     
     print("\n=== TEST SUMMARY ===\n")
     for status, title in results:
-        print(f"{status}: {title}")
-    
+        print(f"{status}: {title}") # Local readability of test results.
+
+        # CI Reporting
+        if status == "PASS":
+            print(f"::notice tile=PASS::{title}") # GitHub Actions annotation for passed test case
+        elif status == "FAIL":
+            print(f"::error title=FAIL::{title}") # GitHub Actions annotation for failed test case
+        elif status == "ERROR":
+            print(f"::error title=ERROR::{title}") # GitHub Actions annotation for errored test case
+
+
     print("\n--- METRICS ---")
     print(f"Total: {total}")
     print(f"Passed: {passed}")
     print(f"Failed: {failed}")
     print(f"Errors: {errors}")
     print(f"Pass Rate: {pass_rate:.2f}%")
+
+    if failed > 0 or errors > 0: 
+        exit(1) # Adds a non-zero count of failed or errored test cases to trigger a failure in CI pipeline
 
     # Save results to txt file
     filename = os.path.join(RESULTS_DIR, f"test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt") 

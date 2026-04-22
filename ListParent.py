@@ -26,7 +26,6 @@ os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the json results directory
 
 
 load_dotenv()
-client = OpenAI()
 MODEL = "gpt-4o-mini"
 
 
@@ -36,6 +35,20 @@ def make_safe_filename(task: str) -> str:
         c for c in task.lower()
         if c.isalnum() or c == " "
     ).strip().replace(" ", "_")[:50]
+
+def run_default_tests():
+    files = [file for file in os.listdir(PLANS_DIR_JSON) if file.endswith(".json")]
+
+    if not files: 
+        print("No saved test cases found.")
+        return
+    
+    filepath = os.path.join(PLANS_DIR_JSON, files[0]) # Just take the first file for default testing
+    test_cases = load_test_cases(filepath)
+
+    results = execute_tests(test_cases)
+
+    generate_report(results) 
 
 # Search for test plan files
 def list_plans():

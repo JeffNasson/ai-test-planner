@@ -3,12 +3,12 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = OpenAI()
 MODEL = "gpt-4o-mini"
 
 
 # Houses prompting logic
 def generate_test_cases(task: str) -> str:
+    client = OpenAI()
     response = client.responses.create(
         model=MODEL,
         input = f"""
