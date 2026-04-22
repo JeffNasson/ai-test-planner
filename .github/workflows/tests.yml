@@ -24,4 +24,4 @@ jobs:
             
             - name: Run tests
               run: |
-                python main.py
+                python -c "from ListParent import run_default_tests; run_default_tests()"
