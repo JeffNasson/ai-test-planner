@@ -27,7 +27,7 @@ jobs:
               run: python -c "from ListParent import run_default_tests; run_default_tests()"
             
             - name: Upload test results
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: test-results
                 path: |
