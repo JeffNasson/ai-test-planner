@@ -26,7 +26,6 @@ os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the json results directory
 
 
 load_dotenv()
-client = OpenAI()
 MODEL = "gpt-4o-mini"
 
 
