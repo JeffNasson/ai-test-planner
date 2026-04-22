@@ -8,7 +8,7 @@ def execute_tests(test_cases):
     results = []
 
     with sync_playwright() as sp:
-        browser = sp.chromium.launch(headless=False)
+        browser = sp.chromium.launch(headless=True) # Set to True for faster execution in CI environments where a UI is not needed. Set headless=False if you want to see the browser actions during test execution.
 
         for case in test_cases:
             context = browser.new_context() # create a new browser context for each test case
