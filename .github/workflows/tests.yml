@@ -20,7 +20,7 @@ jobs:
             
             - name: Install dependencies
               run: |
-                pip install playwright python-dotenv
+                pip install playwright python-dotenv openai
                 playwright install
             
             - name: Run tests
