@@ -23,5 +23,4 @@ jobs:
                 playwright install
             
             - name: Run tests
-              run: |
-                python -c "from ListParent import run_default_tests; run_default_tests()"
+              run: python -c "from ListParent import run_default_tests; run_default_tests()"
