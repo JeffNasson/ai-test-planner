@@ -26,3 +26,8 @@ AI → JSON → Data Manager → Executor → Assertions → Reporting
 - PASS / FAIL results
 - Metrics (pass rate, totals)
 - Saved reports in /test_results
+
+
+## CI Status
+
+![Tests](https://github.com/JeffNasson/ai-test-planner/actions/workflows/tests.yml/badge.svg)
