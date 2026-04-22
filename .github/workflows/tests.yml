@@ -2,7 +2,7 @@ name: Run QA Tests
 
 on:
     push:
-        branches: [CICD-Creation]
+    pull_request:
 
 jobs:
     test:
