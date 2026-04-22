@@ -20,8 +20,17 @@ def generate_report(results):
     
     print("\n=== TEST SUMMARY ===\n")
     for status, title in results:
-        print(f"{status}: {title}")
-    
+        print(f"{status}: {title}") # Local readability of test results.
+
+        # CI Reporting
+        if status == "PASS":
+            print(f"::notice tile=PASS::{title}") # GitHub Actions annotation for passed test case
+        elif status == "FAIL":
+            print(f"::error title=FAIL::{title}") # GitHub Actions annotation for failed test case
+        elif status == "ERROR":
+            print(f"::error title=ERROR::{title}") # GitHub Actions annotation for errored test case
+
+
     print("\n--- METRICS ---")
     print(f"Total: {total}")
     print(f"Passed: {passed}")
