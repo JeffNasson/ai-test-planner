@@ -2,7 +2,11 @@ def validate_test_cases(test_cases):
     results = []
 
     for test_case in test_cases:
-        issues = []
+        issues = {
+            "critical": [],
+            "warning": [],
+            "info": []
+        }
         score = 100 # Start with a perfect score of 100 for each test case and deduct points for each issue found.
         critical_failure = False # This flag can be used to immediately mark a test case as invalid if a critical issue is found (e.g., missing required fields).
 
@@ -10,32 +14,33 @@ def validate_test_cases(test_cases):
         required_fields = ["title", "steps", "expected", "assertion"] # These are the fields that must be present and non-empty in each test case. The 'assertion' field is also required to ensure that there is a clear check for the expected behavior of the test case.
         for field in required_fields:
             if not test_case.get(field):
-                issues.append(f"Missing required field: {field}")
                 score -= 25
+                issues["critical"].append(f"Missing required field: {field}")
                 critical_failure = True # If a required field is missing, we can consider this a critical failure and mark the test case as invalid immediately.
         
         # Rule 2: Steps must exist (-20 points if not steps provided)
         if len(test_case.get("steps", [])) == 0: # This checks if the 'steps' field is present and contains at least one step.
-            issues.append("No steps provided")
+            issues["critical"].append("No steps provided")
             score -= 20
+            critical_failure = True
         
         # Rule 3: Assertion logic check (-20 points for missing locator in text_present assertions)
         assertion = test_case.get("assertion", {}) # This retrieves the 'assertion' field from the test case, or an empty dictionary if it is not present.
         if assertion.get("type") == "text_present" and not assertion.get("locator"): # This checks if the assertion type is 'text_present' and if the 'locator' field is missing.
-            issues.append("Missing locator for text_present")
+            issues["warning"].append("locator field missing")
             score -= 20
         
         # Rule 4: Edge case logic check (-15 points for edge cases reusing negative expectations)
         if test_case.get("type") == "edge":
             if "invalid" in test_case.get("expected", "").lower(): # This checks if the test case is categorized as an edge case and if the expected result contains the word 'invalid', which would indicate that it is not properly categorized as an edge case.
-                issues.append("Edge case reusing negative expectation")
+                issues["critical"].append("Edge case reusing negative expectation")
                 score -= 15
                 critical_failure = True 
         
         # Rule 5: Weak assertion value (-10)
         if len(assertion.get("value", "")) < 3:
-            issues.append("weak assertion value")
             score -= 10
+            issues["info"].append("Short expected message")
         
         # Normalize score
         score = max(score, 0) # Ensure that the score does not go below 0.
