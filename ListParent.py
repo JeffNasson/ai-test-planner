@@ -9,6 +9,7 @@ from assertion_runner import run_real_assertion
 from ai_engine import generate_test_cases
 from reporting import generate_report
 from test_executor import execute_tests
+from ai_validator import validate_test_cases
 
 DEBUG = False
 
@@ -136,6 +137,20 @@ def job_helper(task: str) -> str:
     try:
         data = json.loads(breakdown) #json.loads() takes json data and deserializes it into a python object (in this case, a dictionary). We can then access the "steps" key to get the list of steps.
         test_cases = data.get("test_cases", [])[:3] # take only the first 3 test cases to ensure we don't exceed our token limit when printing steps. Return an empty array if test_cases does not exist. In an enterprise application, you would want to handle this more robustly, perhaps by paginating the output or allowing the user to select which test cases to view.
+
+        validation_results = validate_test_cases(test_cases) # Validate the test cases before execution. This checks for common issues such as missing fields, unclear steps, or mismatched assertions. If any test case is invalid, it prints the issues and returns an error message instead of proceeding with execution.
+        for result in validation_results:
+            if not result["valid"]:
+                print(f"AI Validation Failed: {result['title']}")
+                print(f"Score: {result['score']}")
+                for issue in result["issues"]:
+                    print(f"- {issue}")
+        # Gate execution if any test case is invalid to prevent running tests that are likely to fail due to issues with the test case design. This allows for a feedback loop where the user can adjust the task description or prompt to the AI to generate better test cases before attempting execution.
+        if any(result["score"] < 70 for result in validation_results):
+            print("\nBlocking execution due to low validation scores. Consider revising the task description or prompt to generate higher quality test cases.\n")
+            return
+
+
     except json.JSONDecodeError:
         print("Failed to parse AI response as JSON. \n")
         print(breakdown)
