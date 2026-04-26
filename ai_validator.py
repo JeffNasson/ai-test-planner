@@ -7,8 +7,8 @@ def validate_test_cases(test_cases):
             "warning": [],
             "info": []
         }
-        score = 100 # Start with a perfect score of 100 for each test case and deduct points for each issue found.
-        critical_failure = False # This flag can be used to immediately mark a test case as invalid if a critical issue is found (e.g., missing required fields).
+        score:int = 100 # Start with a perfect score of 100 for each test case and deduct points for each issue found.
+        critical_failure:bool = False # This flag can be used to immediately mark a test case as invalid if a critical issue is found (e.g., missing required fields).
 
         # Rule 1: Required fields check (-25 points for each missing required field)
         required_fields = ["title", "steps", "expected", "assertion"] # These are the fields that must be present and non-empty in each test case. The 'assertion' field is also required to ensure that there is a clear check for the expected behavior of the test case.
@@ -27,7 +27,7 @@ def validate_test_cases(test_cases):
         # Rule 3: Assertion logic check (-20 points for missing locator in text_present assertions)
         assertion = test_case.get("assertion", {}) # This retrieves the 'assertion' field from the test case, or an empty dictionary if it is not present.
         if assertion.get("type") == "text_present" and not assertion.get("locator"): # This checks if the assertion type is 'text_present' and if the 'locator' field is missing.
-            issues["warning"].append("locator field missing")
+            issues["warning"].append("Missing locator for text_present")
             score -= 20
         
         # Rule 4: Edge case logic check (-15 points for edge cases reusing negative expectations)
@@ -45,10 +45,19 @@ def validate_test_cases(test_cases):
         # Normalize score
         score = max(score, 0) # Ensure that the score does not go below 0.
 
+        confidence:str = ""
+        if score >= 90:
+            confidence = "HIGH" # Test is reliable
+        elif score >= 75: 
+            confidence = "MEDIUM" # Passable but has some issues
+        else:
+            confidence = "LOW" # Weak test
+
 
         results.append({
             "title": test_case.get("title"),
             "score": score,
+            "confidence": confidence,
             "valid": score >= 70 and not critical_failure, # A test case is considered valid if it has a score of 70 or above and does not have any critical failures (e.g., missing required fields).
             "issues": issues
         })
