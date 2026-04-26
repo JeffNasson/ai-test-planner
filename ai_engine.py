@@ -7,7 +7,7 @@ MODEL = "gpt-4o-mini"
 
 
 # Houses prompting logic
-def generate_test_cases(task: str) -> str:
+def generate_test_cases(task: str, feedback: str = "") -> str:
     client = OpenAI()
     response = client.responses.create(
         model=MODEL,
@@ -68,6 +68,11 @@ def generate_test_cases(task: str) -> str:
         - No extra text outside JSON
 
         Scenario: {task}
+
+        Fix all listed issues from the previous attempt. Do not repeat them: 
+        {feedback}
+        Generate imrpoved test cases.
+
         """,
         max_output_tokens=450
     )
