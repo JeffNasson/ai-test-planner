@@ -9,6 +9,9 @@ os.makedirs(RESULTS_DIR, exist_ok=True) # Create the txt results directory if it
 RESULTS_JSON_DIR = "test_results_json"
 os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the JSON results directory if it doesn't exist
 
+LOG_DIR = "validation_logs"
+os.makedirs(LOG_DIR, exist_ok=True) # Create the validation logs directory if it doesn't exist
+
 def generate_report(results):
     # Calculate metrics
     total = len(results)
@@ -81,3 +84,16 @@ def generate_report(results):
     with open(json_filename,"w") as f:
         json.dump(data, f, indent=4)
     print(f"Results saved to {json_filename}")
+
+
+def log_validation_results(validation_results):
+    filename = os.path.join(LOG_DIR, f"validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+
+    data = {
+        "timestamp": datetime.now().isoformat(),
+        "results": validation_results
+    }
+
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
+    print(f"Validation log saved to {filename}")
