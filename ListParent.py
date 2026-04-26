@@ -7,9 +7,12 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 from assertion_runner import run_real_assertion
 from ai_engine import generate_test_cases
-from reporting import generate_report
+from reporting import generate_report, log_validation_results
 from test_executor import execute_tests
 from ai_validator import validate_test_cases
+from test_ai_validator import run_validator_tests
+from validation_force_failure import force_failure
+
 
 DEBUG = False
 
@@ -56,12 +59,12 @@ def list_plans():
     # files returns a list of all files in the test_plans directory that start with "plan_"
     files = [f for f in os.listdir(PLANS_DIR) if f.startswith("plan_")]
     
-    # if not files checks if the list is empty. If it is empty, it prints "No deathstar plans found." and returns an empty list. This is to handle the case where there are no plans saved yet.
+    # if not files checks if the list is empty. If it is empty, it prints "No test plans found." and returns an empty list. This is to handle the case where there are no plans saved yet.
     if not files:
-        print("No deathstar plans found.")
+        print("No test plans found.")
         return[]
     
-    print("\nSaved Deathstar Plans:")
+    print("\nSaved test plans:")
 
     # enumerate(files, start=1) gives us both the index (starting from 1) and the filename for each file in the list. We can then print them in a numbered list format.
     for i, file in enumerate(files, start=1):
@@ -88,10 +91,10 @@ def load_test_cases(filepath:str):
         return data["test_cases"]
 
 # Sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
-def break_down_task(task: str) -> str:
+def break_down_task(task: str, feedback: str = "") -> str:
     print("Breaking task down...")
 
-    raw_text = generate_test_cases(task)
+    raw_text = generate_test_cases(task, feedback) # pass feedback into AI generator for iterative improvement
 
     if DEBUG:
         print("\n--- RAW AI RESPONSE ---\n")
@@ -122,40 +125,52 @@ def break_down_task(task: str) -> str:
 def job_helper(task: str) -> str:
     print("\nGenerating test cases...")
 
-    breakdown = break_down_task(task)
+    MAX_RETRIES = 2
+    feedback = ""
 
-    if DEBUG:
-        print("\n--- FINAL JSON BEING PARSED ---\n")
-        print(breakdown)
-        print(f"\nTYPE: {type(breakdown)}")
-    
-    if not breakdown.strip().endswith("}"):
-        print("Incomplete AI response, likely token limit hit.\n")
-        print(breakdown)
-        return "Error: Incomplete AI response."
+    for attempt in range(MAX_RETRIES + 1): 
+        breakdown = break_down_task(task, feedback)
 
-    try:
-        data = json.loads(breakdown) #json.loads() takes json data and deserializes it into a python object (in this case, a dictionary). We can then access the "steps" key to get the list of steps.
-        test_cases = data.get("test_cases", [])[:3] # take only the first 3 test cases to ensure we don't exceed our token limit when printing steps. Return an empty array if test_cases does not exist. In an enterprise application, you would want to handle this more robustly, perhaps by paginating the output or allowing the user to select which test cases to view.
+        try:
+            data = json.loads(breakdown)
+            test_cases = data.get("test_cases",[])
+        except:
+            print("JSON parse failed")
+            continue
 
-        validation_results = validate_test_cases(test_cases) # Validate the test cases before execution. This checks for common issues such as missing fields, unclear steps, or mismatched assertions. If any test case is invalid, it prints the issues and returns an error message instead of proceeding with execution.
+        validation_results = validate_test_cases(test_cases)
+
+        # Print validation results for all test cases
+        for result in validation_results:
+            print(f"\nAI VALIDATION: {result['title']}")
+            print(f"Score: {result['score']}")
+            print(f"Confidence: {result['confidence']}")
+
+            if result["issues"]:
+                for issue in result["issues"]["critical"]:
+                    print(f"[CRITICAL] {issue}")
+                for issue in result["issues"]["warning"]:
+                    print(f"[WARNING] {issue}")
+
+        if all(result["valid"] for result in validation_results): # If result field is valid, pass the check
+            print("\nAI output passed validation\n")
+            break
+        
+        # Send feedback to prompt 
         for result in validation_results:
             if not result["valid"]:
-                print(f"AI Validation Failed: {result['title']}")
-                print(f"Score: {result['score']}")
-                for issue in result["issues"]:
-                    print(f"- {issue}")
-        # Gate execution if any test case is invalid to prevent running tests that are likely to fail due to issues with the test case design. This allows for a feedback loop where the user can adjust the task description or prompt to the AI to generate better test cases before attempting execution.
-        if any(result["score"] < 70 for result in validation_results):
-            print("\nBlocking execution due to low validation scores. Consider revising the task description or prompt to generate higher quality test cases.\n")
-            return
+                feedback += f"\nTest Case: {result['title']}\n"
+                for issue in result["issues"]["critical"]:
+                    feedback += f"- {issue}\n"
+        else:
+            print(f"\nValidation failed (attempt {attempt + 1})")
 
-
-    except json.JSONDecodeError:
-        print("Failed to parse AI response as JSON. \n")
-        print(breakdown)
-        return "Error: AI response was not valid JSON"
+            if attempt == MAX_RETRIES:
+                print("Max retries reached. Blocking execution.")
+                return
     
+
+    log_validation_results(validation_results) # Save validation history
     results = execute_tests(test_cases)
     generate_report(results)
 
