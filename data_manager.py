@@ -1,4 +1,3 @@
-import random
 from user_generator import create_positive_test_user, create_negative_test_user
 
 def resolve_credentials(case):
