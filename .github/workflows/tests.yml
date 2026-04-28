@@ -26,7 +26,7 @@ jobs:
                 playwright install
             
             - name: Run tests
-              run: python -c "from ListParent import run_default_tests; run_default_tests()"
+              run: python -c "from orchestrator/pipeline import run_default_tests; run_default_tests()"
             
             - name: Upload test results
               uses: actions/upload-artifact@v4
