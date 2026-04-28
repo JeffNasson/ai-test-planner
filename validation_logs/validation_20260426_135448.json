@@ -1,0 +1,38 @@
+{
+    "timestamp": "2026-04-26T13:54:48.247255",
+    "results": [
+        {
+            "title": "Successful Login",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        },
+        {
+            "title": "Invalid Login",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        },
+        {
+            "title": "Empty Fields Submission",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        }
+    ]
+}

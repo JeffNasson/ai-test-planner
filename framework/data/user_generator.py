@@ -1,4 +1,4 @@
-from api_client import create_api_user
+from framework.api.api_client import create_api_user
 
 # Simulate API create user function. In an enterprise application we want to do this via internal API and send credentials securely
 def create_positive_test_user():

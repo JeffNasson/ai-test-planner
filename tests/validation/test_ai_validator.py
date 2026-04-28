@@ -1,4 +1,4 @@
-from ai_validator import validate_test_cases
+from framework.validation.ai_validator import validate_test_cases
 
 def run_validator_tests():
     test_cases = [

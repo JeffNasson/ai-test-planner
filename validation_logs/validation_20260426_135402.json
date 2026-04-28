@@ -1,0 +1,38 @@
+{
+    "timestamp": "2026-04-26T13:54:02.748311",
+    "results": [
+        {
+            "title": "Successful login",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        },
+        {
+            "title": "Unsuccessful login with invalid credentials",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        },
+        {
+            "title": "Login attempt with empty fields",
+            "score": 100,
+            "confidence": "HIGH",
+            "valid": true,
+            "issues": {
+                "critical": [],
+                "warning": [],
+                "info": []
+            }
+        }
+    ]
+}

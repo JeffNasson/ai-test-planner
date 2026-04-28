@@ -1,0 +1,23 @@
+{
+    "results": [
+        {
+            "status": "PASS",
+            "title": "Successful login with valid credentials"
+        },
+        {
+            "status": "PASS",
+            "title": "Login attempt with invalid credentials"
+        },
+        {
+            "status": "PASS",
+            "title": "Login attempt with empty fields"
+        }
+    ],
+    "metrics": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "pass_rate": 100.0
+    }
+}
