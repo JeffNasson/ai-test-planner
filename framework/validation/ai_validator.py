@@ -37,10 +37,16 @@ def validate_test_cases(test_cases):
                 score -= 15
                 critical_failure = True 
         
-        # Rule 5: Weak assertion value (-10)
-        if len(assertion.get("value", "")) < 3:
-            score -= 10
-            issues["info"].append("Short expected message")
+        # Rule 5: Weak assertion value (20-25 points for poor quality assertions)
+        value = assertion.get("value","").strip()
+
+        if not value:
+            score -= 25
+            issues["critical"].append("Assertion value is empty")
+            critical_failure = True
+        elif len(value) < 5:
+            score -= 20
+            issues["warning"].append("Assertion value too short to be meaningful")
         
         # Normalize score
         score = max(score, 0) # Ensure that the score does not go below 0.
