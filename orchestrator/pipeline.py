@@ -10,7 +10,7 @@ from framework.validation.ai_validator import validate_test_cases
 from config.config import PLANS_DIR, PLANS_DIR_JSON, RESULTS_DIR, RESULTS_JSON_DIR
 from framework.data.path_setup import verify_directories_exist
 from framework.data.test_data_manager import (load_test_cases, list_plans, read_plan, save_test_cases)
-
+from debug.force_weak_assertion import force_weak_assertion
 
 DEBUG = False
 
@@ -93,6 +93,8 @@ def job_helper(task: str) -> str:
             print("JSON parse failed")
             continue
 
+        force_weak_assertion(attempt, test_cases) # Test weak assertion logic
+
         validation_results = validate_test_cases(test_cases)
 
         # Print validation results for all test cases
@@ -107,22 +109,49 @@ def job_helper(task: str) -> str:
                 for issue in result["issues"]["warning"]:
                     print(f"[WARNING] {issue}")
 
-        if all(result["valid"] for result in validation_results): # If result field is valid, pass the check
-            print("\nAI output passed validation\n")
+        all_valid = all(result["valid"] for result in validation_results) # all_valid = True if all results have "valid" set to True
+        has_low_confidence = any(result["confidence"] == "LOW" for result in validation_results)
+
+        # Check if tests are valid with high confidence
+        if all_valid and not has_low_confidence:
+            print("\nAI output passed validation with acceptable confidence\n")
             break
         
-        # Send feedback to prompt 
+        # Build feedback loop for invalid and low confidence and place findings in feedback variable
+        feedback = ""
+        
         for result in validation_results:
-            if not result["valid"]:
-                feedback += f"\nTest Case: {result['title']}\n"
+            if not result["valid"] or result["confidence"] == "LOW":
+                feedback += f"\nTest Case: {result["title"]}\n"
+
                 for issue in result["issues"]["critical"]:
                     feedback += f"- {issue}\n"
-        else:
-            print(f"\nValidation failed (attempt {attempt + 1})")
 
-            if attempt == MAX_RETRIES:
-                print("Max retries reached. Blocking execution.")
-                return
+                if result["confidence"] == "LOW":
+                    feedback += "- Improve test clarity, assertions, or completeness\n"
+        
+        # Retry Logic (Gating)
+        if all_valid and has_low_confidence:
+            print(f"\nValid but LOW confidence(attempt {attempt+1}). Retrying...")
+        else:
+            print(f"\nValidation failed (attempt {attempt+1})")
+        
+        if attempt == MAX_RETRIES:
+            print("Max retries reached. Blocking execution.")
+            return
+
+        # # Send feedback to prompt 
+        # for result in validation_results:
+        #     if not result["valid"]:
+        #         feedback += f"\nTest Case: {result['title']}\n"
+        #         for issue in result["issues"]["critical"]:
+        #             feedback += f"- {issue}\n"
+        # else:
+        #     print(f"\nValidation failed (attempt {attempt + 1})")
+
+        #     if attempt == MAX_RETRIES:
+        #         print("Max retries reached. Blocking execution.")
+        #         return
     
 
     log_validation_results(validation_results) # Save validation history
