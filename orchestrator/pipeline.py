@@ -93,7 +93,8 @@ def job_helper(task: str) -> str:
             print("JSON parse failed")
             continue
 
-        force_weak_assertion(attempt, test_cases) # Test weak assertion logic
+        # Test weak assertion logic
+        # force_weak_assertion(attempt, test_cases) 
 
         validation_results = validate_test_cases(test_cases)
 
@@ -122,7 +123,7 @@ def job_helper(task: str) -> str:
         
         for result in validation_results:
             if not result["valid"] or result["confidence"] == "LOW":
-                feedback += f"\nTest Case: {result["title"]}\n"
+                feedback += f"\nTest Case: {result['title']}\n"
 
                 for issue in result["issues"]["critical"]:
                     feedback += f"- {issue}\n"
