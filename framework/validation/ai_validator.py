@@ -1,3 +1,10 @@
+from enum import Enum
+
+class ConfidenceLevel(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
 def validate_test_cases(test_cases):
     results = []
 
@@ -53,11 +60,11 @@ def validate_test_cases(test_cases):
 
         confidence:str = ""
         if score >= 90:
-            confidence = "HIGH" # Test is reliable
+            confidence = ConfidenceLevel.HIGH # Test is reliable
         elif score >= 75: 
-            confidence = "MEDIUM" # Passable but has some issues
+            confidence = ConfidenceLevel.MEDIUM # Passable but has some issues
         else:
-            confidence = "LOW" # Weak test
+            confidence = ConfidenceLevel.LOW # Weak test
 
 
         results.append({
