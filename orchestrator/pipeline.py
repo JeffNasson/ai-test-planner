@@ -106,9 +106,9 @@ def job_helper(task: str) -> str:
 
             if result["issues"]:
                 for issue in result["issues"]["critical"]:
-                    print(f"[CRITICAL] {issue}")
+                    print(f"[CRITICAL] {issue['message']}")
                 for issue in result["issues"]["warning"]:
-                    print(f"[WARNING] {issue}")
+                    print(f"[WARNING] {issue['message']}")
 
         all_valid = all(result["valid"] for result in validation_results) # all_valid = True if all results have "valid" set to True
         all_high_confidence = all(result["confidence"] == ConfidenceLevel.HIGH for result in validation_results)
@@ -127,7 +127,7 @@ def job_helper(task: str) -> str:
                 feedback += f"\nTest Case: {result['title']}\n"
 
                 for issue in result["issues"]["critical"]:
-                    feedback += f"- {issue}\n"
+                    feedback += f"- {issue['message']}\n"
 
                 if result["confidence"] == ConfidenceLevel.LOW:
                     feedback += "- Improve test clarity, assertions, or completeness\n"
