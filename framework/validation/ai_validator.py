@@ -70,7 +70,7 @@ def validate_test_cases(test_cases):
         results.append({
             "title": test_case.get("title"),
             "score": score,
-            "confidence": confidence,
+            "confidence": confidence.value,
             "valid": score >= 70 and not critical_failure, # A test case is considered valid if it has a score of 70 or above and does not have any critical failures (e.g., missing required fields).
             "issues": issues
         })
