@@ -106,19 +106,40 @@ def job_helper(task: str) -> str:
         force_weak_assertion(attempt, test_cases) 
 
         validation_results = validate_test_cases(test_cases)
+
+        # Track validation metrics for the current retry attempt
+        attempt_validation_summary = {
+            "HIGH": 0,
+            "MEDIUM": 0,
+            "LOW": 0
+        }
+
+        # Track frequency of validation rule failures for the current retry attempt
+        attempt_rule_frequency = {}
         
         # Update validation_summary counts
         for result in validation_results:
+
+            # Workflow level confidence summary tracking
             validation_summary[result["confidence"]] += 1
+
+            # Attempt level confidence summary tracking
+            attempt_validation_summary[result["confidence"]] += 1
         
             # Add any validation issues to the rule_frequency dictionary for tracking
             for severity in result["issues"]: # Loop through each severity level in the issues (e.g., "critical", "warning", "info")
                 for issue in result["issues"][severity]: # Loop through each issue in the current severity level
                     rule = issue["rule"] # EX: ASSERTION_LENGTH
-                    if rule not in rule_frequency: # If this rule has not been seen before, initialize its count to 0 in the rule_frequency dictionary
-                        rule_frequency[rule] = 0
                     
+                    # Workflow level rule failure aggregation
+                    if rule not in rule_frequency: # If this rule has not been seen before, initialize its count to 0 in the rule_frequency dictionary
+                        rule_frequency[rule] = 0                 
                     rule_frequency[rule] += 1 # Increment the count for this rule in the frequency dictionary
+
+                    # Attempt level rule failure aggregation
+                    if rule not in attempt_rule_frequency:
+                        attempt_rule_frequency[rule] = 0
+                    attempt_rule_frequency[rule] += 1
 
         # Print validation results for all test cases
         for result in validation_results:
@@ -140,8 +161,8 @@ def job_helper(task: str) -> str:
         attempt_data = build_validation_attempt(
             attempt,
             validation_results,
-            validation_summary,
-            rule_frequency,
+            attempt_validation_summary,
+            attempt_rule_frequency,
             retry_count,
             all_valid and all_high_confidence
         )
