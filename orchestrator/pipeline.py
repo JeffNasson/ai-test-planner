@@ -1,14 +1,13 @@
 from dotenv import load_dotenv
 import os
 import json
-import time
 from framework.ai.ai_engine import generate_test_cases
 from framework.reporting.reporting import generate_report, log_validation_results
 from framework.execution.test_executor import execute_tests
 from framework.validation.ai_validator import validate_test_cases, ConfidenceLevel
 from config.config import PLANS_DIR, PLANS_DIR_JSON, RESULTS_DIR, RESULTS_JSON_DIR
 from framework.data.path_setup import verify_directories_exist
-from framework.data.test_data_manager import (load_test_cases, list_plans, read_plan, save_test_cases)
+from framework.data.test_data_manager import (load_test_cases, list_plans, read_plan)
 from framework.validation.build_validation_attempt import build_validation_attempt
 # from debug.force_weak_assertion import force_weak_assertion
 
@@ -145,11 +144,13 @@ def job_helper(task: str) -> str:
             print(f"Score: {result['score']}")
             print(f"Confidence: {result['confidence']}")
 
-            if result["issues"]:
+            if (result["issues"]["critical"] or result["issues"]["warning"] or result["issues"]["info"]):
                 for issue in result["issues"]["critical"]:
                     print(f"[CRITICAL] {issue['message']}")
                 for issue in result["issues"]["warning"]:
                     print(f"[WARNING] {issue['message']}")
+                for issue in result["issues"]["info"]:
+                    print(f"[INFO] {issue['message']}")
 
         all_valid = all(result["valid"] for result in validation_results) # all_valid = True if all results have "valid" set to True
         all_high_confidence = all(result["confidence"] == ConfidenceLevel.HIGH for result in validation_results)
