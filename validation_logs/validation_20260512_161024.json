@@ -1,0 +1,118 @@
+{
+    "timestamp": "2026-05-12T16:10:24.154035",
+    "task": "login form",
+    "retry_count": 1,
+    "validation_summary": {
+        "HIGH": 5,
+        "MEDIUM": 1,
+        "LOW": 0
+    },
+    "rule_frequency": {
+        "ASSERTION_LENGTH": 1
+    },
+    "attempts": [
+        {
+            "attempt": 1,
+            "passed_gate": false,
+            "retry_count": 0,
+            "validation_summary": {
+                "HIGH": 2,
+                "MEDIUM": 1,
+                "LOW": 0
+            },
+            "rule_frequency": {
+                "ASSERTION_LENGTH": 1
+            },
+            "results": [
+                {
+                    "title": "Successful Login",
+                    "score": 80,
+                    "confidence": "MEDIUM",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [
+                            {
+                                "rule": "ASSERTION_LENGTH",
+                                "field": "assertion.value",
+                                "severity": "warning",
+                                "message": "Assertion value too short to be meaningful"
+                            }
+                        ],
+                        "info": []
+                    }
+                },
+                {
+                    "title": "Invalid Credentials Login",
+                    "score": 100,
+                    "confidence": "HIGH",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [],
+                        "info": []
+                    }
+                },
+                {
+                    "title": "Login with Empty Fields",
+                    "score": 100,
+                    "confidence": "HIGH",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [],
+                        "info": []
+                    }
+                }
+            ]
+        },
+        {
+            "attempt": 2,
+            "passed_gate": true,
+            "retry_count": 1,
+            "validation_summary": {
+                "HIGH": 3,
+                "MEDIUM": 0,
+                "LOW": 0
+            },
+            "rule_frequency": {
+                "ASSERTION_LENGTH": 1
+            },
+            "results": [
+                {
+                    "title": "Successful Login",
+                    "score": 100,
+                    "confidence": "HIGH",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [],
+                        "info": []
+                    }
+                },
+                {
+                    "title": "Invalid Login Credentials",
+                    "score": 100,
+                    "confidence": "HIGH",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [],
+                        "info": []
+                    }
+                },
+                {
+                    "title": "Empty Fields in Login",
+                    "score": 100,
+                    "confidence": "HIGH",
+                    "valid": true,
+                    "issues": {
+                        "critical": [],
+                        "warning": [],
+                        "info": []
+                    }
+                }
+            ]
+        }
+    ]
+}
