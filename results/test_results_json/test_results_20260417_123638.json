@@ -1,0 +1,23 @@
+{
+    "results": [
+        {
+            "status": "FAIL",
+            "title": "Successful Login"
+        },
+        {
+            "status": "PASS",
+            "title": "Invalid Login Attempt"
+        },
+        {
+            "status": "PASS",
+            "title": "Empty Fields Submission"
+        }
+    ],
+    "metrics": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1,
+        "errors": 0,
+        "pass_rate": 66.66666666666666
+    }
+}

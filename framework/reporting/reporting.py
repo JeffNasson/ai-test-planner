@@ -1,13 +1,8 @@
 from datetime import datetime
 import json
 import os
+from config.config import RESULTS_DIR, RESULTS_JSON_DIR, VALIDATION_LOGS_DIR
 
-
-RESULTS_DIR = "test_results"
-os.makedirs(RESULTS_DIR, exist_ok=True) # Create the txt results directory if it doesn't exist
-
-RESULTS_JSON_DIR = "test_results_json"
-os.makedirs(RESULTS_JSON_DIR, exist_ok=True) # Create the JSON results directory if it doesn't exist
 
 def generate_report(results):
     # Calculate metrics
@@ -42,7 +37,7 @@ def generate_report(results):
         exit(1) # Adds a non-zero count of failed or errored test cases to trigger a failure in CI pipeline
 
     # Save results to txt file
-    filename = os.path.join(RESULTS_DIR, f"test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt") 
+    filename = RESULTS_DIR / f"test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt" 
 
     with open(filename,"w") as f:
         f.write("=== TEST RESULTS ===\n\n")
@@ -60,7 +55,7 @@ def generate_report(results):
 
     # Save results file to JSON format for easier parsing in an enterprise application. This allows for integration with other tools, such as dashboards or test management systems, that can consume JSON data.
     base_name = os.path.basename(filename).replace(".txt",".json")
-    json_filename = os.path.join(RESULTS_JSON_DIR, base_name)
+    json_filename = RESULTS_JSON_DIR / base_name
 
     data = {
         "results": [
@@ -81,3 +76,20 @@ def generate_report(results):
     with open(json_filename,"w") as f:
         json.dump(data, f, indent=4)
     print(f"Results saved to {json_filename}")
+
+
+def log_validation_results(task, validation_attempts, validation_summary, rule_frequency, retry_count):
+    filename = VALIDATION_LOGS_DIR / f"validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+    data = {
+        "timestamp": datetime.now().isoformat(),
+        "task": task, # Original pipeline task submission
+        "retry_count": retry_count, # Total retries required during validation gating
+        "validation_summary": validation_summary, # Aggregate confidence telemetry across all attempts
+        "rule_frequency": rule_frequency, # Aggregate validation rule failure telemetry across all attempts
+        "attempts": validation_attempts # Historical validation attempt snapshots
+    }
+
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
+    print(f"Validation log saved to {filename}")

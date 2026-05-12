@@ -1,0 +1,296 @@
+from dotenv import load_dotenv
+import os
+import json
+from framework.ai.ai_engine import generate_test_cases
+from framework.reporting.reporting import generate_report, log_validation_results
+from framework.execution.test_executor import execute_tests
+from framework.validation.ai_validator import validate_test_cases, ConfidenceLevel
+from config.config import PLANS_DIR, PLANS_DIR_JSON, RESULTS_DIR, RESULTS_JSON_DIR
+from framework.data.path_setup import verify_directories_exist
+from framework.data.test_data_manager import (load_test_cases, list_plans, read_plan)
+from framework.validation.build_validation_attempt import build_validation_attempt
+# from debug.force_weak_assertion import force_weak_assertion
+
+DEBUG = False
+
+# Verify log directories exist, if not, create them
+verify_directories_exist()
+
+load_dotenv()
+
+
+# This function takes a task description as input and generates a safe filename by removing special characters, replacing spaces with underscores, and limiting the length to 50 characters. This is used to create filenames for saving test plans that are descriptive of the task while ensuring they are valid and not too long for most file systems.
+def make_safe_filename(task: str) -> str:
+    return "".join(
+        c for c in task.lower()
+        if c.isalnum() or c == " "
+    ).strip().replace(" ", "_")[:50]
+
+def run_default_tests():
+    files = [file for file in os.listdir(PLANS_DIR_JSON) if file.endswith(".json")]
+
+    if not files: 
+        print("No saved test cases found.")
+        return
+    
+    filepath = PLANS_DIR_JSON / files[0] # Just take the first file for default testing
+    test_cases = load_test_cases(filepath)
+
+    results = execute_tests(test_cases)
+
+    generate_report(results) 
+
+
+
+
+# Sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
+def break_down_task(task: str, feedback: str = "") -> str:
+    print("Breaking task down...")
+
+    raw_text = generate_test_cases(task, feedback) # pass feedback into AI generator for iterative improvement
+
+    if DEBUG:
+        print("\n--- RAW AI RESPONSE ---\n")
+        print(raw_text)
+    
+    cleaned = raw_text.strip() # Remove leading and trailing whitespace. Whitespace can cause issues when trying to parse JSON
+
+    if cleaned.startswith("```"):
+        cleaned = cleaned.replace("```json","").replace("```","").strip() # If the response is wrapped in markdown code blocks, remove them.
+    
+    if DEBUG:
+        print("\n--- CLEANED JSON ---\n")
+        print(cleaned)
+
+    return cleaned
+
+
+# Main helper function that orchestrates the workflow of the application. It does the following:
+# 1. Takes a task description as input
+# 2. Calls break_down_task to get test cases from the AI
+# 3. Parses the AI response as JSON and extracts the test cases
+# 4. Calls run_test_cases to execute the test cases using Playwright
+# 5. Saves the test cases to a text file in the test_cases directory with a timestamp and task description in the filename for easy reference
+def job_helper(task: str) -> str:
+    print("\nGenerating test cases...")
+
+    MAX_RETRIES = 2
+    feedback = ""
+    validation_summary = {
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+    }
+
+    rule_frequency = {}
+
+    retry_count = 0
+
+    validation_attempts = []
+
+
+    for attempt in range(MAX_RETRIES + 1): 
+        breakdown = break_down_task(task, feedback)
+
+        try:
+            data = json.loads(breakdown)
+            test_cases = data.get("test_cases",[])
+        except json.JSONDecodeError:
+            print("JSON parse failed")
+            continue
+
+        # Test weak assertion logic by forcing a weak assertion to the first test case in the first run.
+        # force_weak_assertion(attempt, test_cases) # Uncomment this line to test the weak assertion logic by forcing a weak assertion on the first test case during the first validation attempt. This is useful for verifying that the validation and feedback loop correctly identifies and handles weak assertions.
+
+        validation_results = validate_test_cases(test_cases)
+
+        # Track validation metrics for the current retry attempt
+        attempt_validation_summary = {
+            "HIGH": 0,
+            "MEDIUM": 0,
+            "LOW": 0
+        }
+
+        # Track frequency of validation rule failures for the current retry attempt
+        attempt_rule_frequency = {}
+        
+        # Update validation_summary counts
+        for result in validation_results:
+
+            # Workflow level confidence summary tracking
+            validation_summary[result["confidence"]] += 1
+
+            # Attempt level confidence summary tracking
+            attempt_validation_summary[result["confidence"]] += 1
+        
+            # Add any validation issues to the rule_frequency dictionary for tracking
+            for severity in result["issues"]: # Loop through each severity level in the issues (e.g., "critical", "warning", "info")
+                for issue in result["issues"][severity]: # Loop through each issue in the current severity level
+                    rule = issue["rule"] # EX: ASSERTION_LENGTH
+                    
+                    # Workflow level rule failure aggregation
+                    if rule not in rule_frequency: # If this rule has not been seen before, initialize its count to 0 in the rule_frequency dictionary
+                        rule_frequency[rule] = 0                 
+                    rule_frequency[rule] += 1 # Increment the count for this rule in the frequency dictionary
+
+                    # Attempt level rule failure aggregation
+                    if rule not in attempt_rule_frequency:
+                        attempt_rule_frequency[rule] = 0
+                    attempt_rule_frequency[rule] += 1
+
+        # Print validation results for all test cases
+        for result in validation_results:
+            print(f"\nAI VALIDATION: {result['title']}")
+            print(f"Score: {result['score']}")
+            print(f"Confidence: {result['confidence']}")
+
+            if (result["issues"]["critical"] or result["issues"]["warning"] or result["issues"]["info"]):
+                for issue in result["issues"]["critical"]:
+                    print(f"[CRITICAL] {issue['message']}")
+                for issue in result["issues"]["warning"]:
+                    print(f"[WARNING] {issue['message']}")
+                for issue in result["issues"]["info"]:
+                    print(f"[INFO] {issue['message']}")
+
+        all_valid = all(result["valid"] for result in validation_results) # all_valid = True if all results have "valid" set to True
+        all_high_confidence = all(result["confidence"] == ConfidenceLevel.HIGH for result in validation_results)
+        has_low_confidence = any(result["confidence"] == ConfidenceLevel.LOW for result in validation_results)
+
+        # Build structured telemetry snapshot for this validation attempt
+        attempt_data = build_validation_attempt(
+            attempt,
+            validation_results,
+            attempt_validation_summary,
+            attempt_rule_frequency,
+            retry_count,
+            all_valid and all_high_confidence
+        )
+
+        validation_attempts.append(attempt_data) # Store telemetry snapshot for this attempt in validation_attempts list
+
+        # Check if tests are valid with high confidence
+        if all_valid and all_high_confidence:
+            print("\nAI output passed validation with acceptable confidence\n")
+
+            print("\n=== VALIDATION METRICS ===")
+            for level, count in validation_summary.items():
+                print(f"{level}: {count}")
+            
+            print(f"Retries This Run: {retry_count}")
+
+            print("\n=== RULE FREQUENCY ===")
+            for rule, count in rule_frequency.items():
+                print(f"{rule}: {count}")
+            break
+
+        
+        # Build feedback loop for invalid and low confidence and place findings in feedback variable
+        feedback = ""
+        
+        for result in validation_results:
+            if not result["valid"] or result["confidence"] == ConfidenceLevel.LOW:
+                feedback += f"\nTest Case: {result['title']}\n"
+
+                for issue in result["issues"]["critical"]:
+                    feedback += f"- {issue['message']}\n"
+
+                if result["confidence"] == ConfidenceLevel.LOW:
+                    feedback += "- Improve test clarity, assertions, or completeness\n"
+        
+        # Retry Logic (Gating)
+        if all_valid and not all_high_confidence:
+            print(f"\nValid but NOT HIGH confidence (attempt {attempt+1}). Retrying...")
+            retry_count += 1
+        else:
+            print(f"\nValidation failed (attempt {attempt+1})")
+            retry_count += 1
+
+        if attempt == MAX_RETRIES:
+            print("Max retries reached. Blocking execution.")
+
+            # Persist failed validation telemetry before exiting.
+            # This ensures failed AI recovery attempts are still observable in logs.
+            log_validation_results(task, validation_attempts, validation_summary,rule_frequency,retry_count)
+            return
+    
+
+    log_validation_results(task, validation_attempts, validation_summary, rule_frequency, retry_count) # Save validation history
+    results = execute_tests(test_cases)
+    generate_report(results)
+
+    return ""
+
+
+def run_pipeline():
+    while True:
+        print("\n=== Test Planner ===")
+        print("1. Create new plan")
+        print("2. View saved plans")
+        print("3. Run saved test cases")
+        print("4. Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            task = input("Enter a task: ")
+            result = job_helper(task)
+            print(result)
+        
+        elif choice == "2":
+            files = list_plans()
+
+            # If no files are found, print a message and skip to the next iteration of the loop
+            if not files:
+                continue
+
+            file_choice = input("\nEnter number to view: ")
+
+            # Check if the input is a numeric digit and within the valid range of file indices
+            if not file_choice.isdigit():
+                print("invalid input.")
+                continue
+            
+            # set index to the integer value of file_choice minus 1 to account for 0-based indexing of the files list
+            index = int(file_choice) - 1
+
+            # Check if the entered index is valid when compared to the length of the files list. If it is valid, call read_plan with the selected file.
+            if 0 <= index  and index < len(files):
+                read_plan(files[index])
+            else:
+                print("Invalid selection.")
+        
+        elif choice == "3":
+            files = [file for file in os.listdir(PLANS_DIR_JSON) if file.endswith(".json")] # List only JSON files in the test_cases_json directory
+
+            if not files:
+                print("No saved test cases found.")
+                continue
+
+            print("\nSaved Test Case Files:")
+            for i, file in enumerate(files, start=1):
+                print(f"{i}. {file}")
+            
+            file_choice = input("\nEnter number to run: ")
+
+            if not file_choice.isdigit():
+                print("Invalid input.")
+                continue
+
+            index = int(file_choice) - 1
+
+            if 0 <= index and index < len(files):
+                filepath = PLANS_DIR_JSON / files[index]
+                test_cases = load_test_cases(filepath)
+                results = execute_tests(test_cases)
+                generate_report(results)
+            else:
+                print("Invalid selection.")
+
+        elif choice == "4":
+            print("Goodbye")
+            break
+        
+        else:
+            print("Invalid choice, try again.")
+
+

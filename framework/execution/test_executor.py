@@ -1,8 +1,8 @@
 import os
 from playwright.sync_api import sync_playwright
-from assertion_runner import run_real_assertion
-from data_manager import resolve_credentials
-from config import get_base_url
+from framework.assertions.assertion_runner import run_real_assertion
+from framework.data.test_data_manager import resolve_credentials
+from config.config import get_base_url
 
 
 def execute_tests(test_cases):

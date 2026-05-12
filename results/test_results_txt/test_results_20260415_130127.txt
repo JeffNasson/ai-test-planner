@@ -1,0 +1,12 @@
+=== TEST RESULTS ===
+
+PASS: Valid Login
+PASS: Invalid Login
+PASS: Empty Fields Login
+
+--- METRICS ---
+Total: 3
+Passed: 3
+Failed: 0
+Errors: 0
+Pass Rate: 100.00%
