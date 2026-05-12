@@ -1,4 +1,3 @@
-from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import json
@@ -10,8 +9,8 @@ from framework.validation.ai_validator import validate_test_cases, ConfidenceLev
 from config.config import PLANS_DIR, PLANS_DIR_JSON, RESULTS_DIR, RESULTS_JSON_DIR
 from framework.data.path_setup import verify_directories_exist
 from framework.data.test_data_manager import (load_test_cases, list_plans, read_plan, save_test_cases)
-from debug.force_weak_assertion import force_weak_assertion
 from framework.validation.build_validation_attempt import build_validation_attempt
+# from debug.force_weak_assertion import force_weak_assertion
 
 DEBUG = False
 
@@ -19,7 +18,6 @@ DEBUG = False
 verify_directories_exist()
 
 load_dotenv()
-MODEL = "gpt-4o-mini"
 
 
 # This function takes a task description as input and generates a safe filename by removing special characters, replacing spaces with underscores, and limiting the length to 50 characters. This is used to create filenames for saving test plans that are descriptive of the task while ensuring they are valid and not too long for most file systems.
@@ -98,12 +96,12 @@ def job_helper(task: str) -> str:
         try:
             data = json.loads(breakdown)
             test_cases = data.get("test_cases",[])
-        except:
+        except json.JSONDecodeError:
             print("JSON parse failed")
             continue
 
         # Test weak assertion logic by forcing a weak assertion to the first test case in the first run.
-        force_weak_assertion(attempt, test_cases) 
+        # force_weak_assertion(attempt, test_cases) # Uncomment this line to test the weak assertion logic by forcing a weak assertion on the first test case during the first validation attempt. This is useful for verifying that the validation and feedback loop correctly identifies and handles weak assertions.
 
         validation_results = validate_test_cases(test_cases)
 
@@ -208,6 +206,10 @@ def job_helper(task: str) -> str:
 
         if attempt == MAX_RETRIES:
             print("Max retries reached. Blocking execution.")
+
+            # Persist failed validation telemetry before exiting.
+            # This ensures failed AI recovery attempts are still observable in logs.
+            log_validation_results(task, validation_attempts, validation_summary,rule_frequency,retry_count)
             return
     
 
