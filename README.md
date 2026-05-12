@@ -34,7 +34,7 @@ Includes a validation feedback loop that iteratively improves AI-generated tests
 
 ## Pipeline
 
-User Input → AI Generation → Validation → Execution → Reporting → Storage
+User Input → AI Generation → Validation → Retry Feedback Loop → Execution → Reporting → Storage
 
 
 ## Architecture
@@ -62,6 +62,17 @@ config.py      environment + paths
 - Decoupled assertion logic
 - JSON-based persistence for replayable test runs
 - CI pipeline (GitHub Actions) for automated test execution
+- Confidence-based validation gating prevents low-quality AI-generated tests from executing.
+
+## Observability and Validation Telemetry
+The framework includes structured validation telemetry for tracking:
+- confidence scoring
+- retry history
+- validation rule frequency
+- AI recovery behavior
+- workflow-level metrics
+- attempt-level metrics
+
 
 ## Running the Project
 ```
