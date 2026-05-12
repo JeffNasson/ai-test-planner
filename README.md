@@ -37,15 +37,33 @@ Includes a validation feedback loop that iteratively improves AI-generated tests
 User Input → AI Generation → Validation → Retry Feedback Loop → Execution → Reporting → Storage
 
 
+## CI/CD Integration
+
+This project includes a GitHub Actions-based CI pipeline that:
+
+- Automatically runs tests on every push and pull request
+- Executes Playwright tests in a headless environment
+- Generates structured test results (TXT + JSON)
+- Uploads test artifacts for inspection directly in GitHub
+- Fails the pipeline on test failures to prevent bad code from passing
+
+This simulates a real-world QA workflow where automated tests act as a quality gate before changes are merged.
+
+## Continuous Integration Workflow
+
+On each push or pull request:
+
+1. GitHub Actions spins up a clean environment
+2. Installs dependencies (Playwright, Python packages)
+3. Executes saved test cases
+4. Generates reports
+5. Uploads artifacts for debugging and traceability
+6. Marks the build as pass/fail based on results
+
+This ensures consistent, repeatable test execution across environments.
+
 ## Architecture
-```
-framework/
-ai/            test generation
-validation/    scoring + quality checks
-execution/     Playwright runner
-assertions/    result validation
-data/          persistence layer
-reporting/     logs + CI output
+AI → JSON → Validation → Data Manager → Executor → Assertions → Reporting → CI Pipeline
 
 orchestrator/
 pipeline.py    main system flow
