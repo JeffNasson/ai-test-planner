@@ -1,3 +1,5 @@
+this is in github mind you. Like this?
+
 ## AI-Driven QA Test Planner
 
 ## Overview
@@ -7,7 +9,6 @@ This project is a modular QA automation framework that generates, validates, exe
 It models a production-style testing pipeline with dynamic test generation, quality validation, Playwright-based execution, and CI integration for automated test runs and reporting.
 
 Includes a validation feedback loop that iteratively improves AI-generated tests until quality thresholds are met.
-
 
 ## How It Works
 
@@ -34,36 +35,17 @@ Includes a validation feedback loop that iteratively improves AI-generated tests
 
 ## Pipeline
 
-User Input → AI Generation → Validation → Retry Feedback Loop → Execution → Reporting → Storage
-
-
-## CI/CD Integration
-
-This project includes a GitHub Actions-based CI pipeline that:
-
-- Automatically runs tests on every push and pull request
-- Executes Playwright tests in a headless environment
-- Generates structured test results (TXT + JSON)
-- Uploads test artifacts for inspection directly in GitHub
-- Fails the pipeline on test failures to prevent bad code from passing
-
-This simulates a real-world QA workflow where automated tests act as a quality gate before changes are merged.
-
-## Continuous Integration Workflow
-
-On each push or pull request:
-
-1. GitHub Actions spins up a clean environment
-2. Installs dependencies (Playwright, Python packages)
-3. Executes saved test cases
-4. Generates reports
-5. Uploads artifacts for debugging and traceability
-6. Marks the build as pass/fail based on results
-
-This ensures consistent, repeatable test execution across environments.
+User Input → AI Generation → Validation → Execution → Reporting → Storage
 
 ## Architecture
-AI → JSON → Validation → Data Manager → Executor → Assertions → Reporting → CI Pipeline
+```
+framework/
+ai/            test generation
+validation/    scoring + quality checks
+execution/     Playwright runner
+assertions/    result validation
+data/          persistence layer
+reporting/     logs + CI output
 
 orchestrator/
 pipeline.py    main system flow
@@ -83,14 +65,13 @@ config.py      environment + paths
 - Confidence-based validation gating prevents low-quality AI-generated tests from executing.
 
 ## Observability and Validation Telemetry
-The framework includes structured validation telemetry for tracking:
+- The framework includes structured validation telemetry for tracking:
 - confidence scoring
 - retry history
 - validation rule frequency
 - AI recovery behavior
 - workflow-level metrics
 - attempt-level metrics
-
 
 ## Running the Project
 ```
@@ -148,7 +129,6 @@ The framework includes structured validation telemetry for tracking:
                 │  Results Storage   │
                 │ (JSON + Logs)      │
                 └────────────────────┘
-
 
 ## CI Status
 ![Tests](https://github.com/JeffNasson/ai-test-planner/actions/workflows/tests.yml/badge.svg)
