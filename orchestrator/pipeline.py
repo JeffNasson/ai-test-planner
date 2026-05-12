@@ -82,6 +82,14 @@ def job_helper(task: str) -> str:
 
     MAX_RETRIES = 2
     feedback = ""
+    validation_summary = {
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+    }
+
+    rule_frequency = {}
+
 
     for attempt in range(MAX_RETRIES + 1): 
         breakdown = break_down_task(task, feedback)
@@ -93,10 +101,23 @@ def job_helper(task: str) -> str:
             print("JSON parse failed")
             continue
 
-        # Test weak assertion logic
+        # Test weak assertion logic by forcing a weak assertion to the first test case in the first run.
         force_weak_assertion(attempt, test_cases) 
 
         validation_results = validate_test_cases(test_cases)
+        
+        # Update validation_summary counts
+        for result in validation_results:
+            validation_summary[result["confidence"]] += 1
+        
+            # Add any validation issues to the rule_frequency dictionary for tracking
+            for severity in result["issues"]: # Loop through each severity level in the issues (e.g., "critical", "warning", "info")
+                for issue in result["issues"][severity]: # Loop through each issue in the current severity level
+                    rule = issue["rule"] # EX: ASSERTION_LENGTH
+                    if rule not in rule_frequency: # If this rule has not been seen before, initialize its count to 0 in the rule_frequency dictionary
+                        rule_frequency[rule] = 0
+                    
+                    rule_frequency[rule] += 1 # Increment the count for this rule in the frequency dictionary
 
         # Print validation results for all test cases
         for result in validation_results:
@@ -117,7 +138,16 @@ def job_helper(task: str) -> str:
         # Check if tests are valid with high confidence
         if all_valid and all_high_confidence:
             print("\nAI output passed validation with acceptable confidence\n")
+
+            print("\n=== VALIDATION METRICS ===")
+            for level, count in validation_summary.items():
+                print(f"{level}: {count}")
+
+            print("\n=== RULE FREQUENCY ===")
+            for rule, count in rule_frequency.items():
+                print(f"{rule}: {count}")
             break
+
         
         # Build feedback loop for invalid and low confidence and place findings in feedback variable
         feedback = ""
