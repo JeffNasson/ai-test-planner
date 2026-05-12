@@ -78,12 +78,16 @@ def generate_report(results):
     print(f"Results saved to {json_filename}")
 
 
-def log_validation_results(validation_results):
+def log_validation_results(task, validation_attempts, validation_summary, rule_frequency, retry_count):
     filename = VALIDATION_LOGS_DIR / f"validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
     data = {
         "timestamp": datetime.now().isoformat(),
-        "results": validation_results
+        "task": task, # Original pipeline task submission
+        "retry_count": retry_count, # Total retries required during validation gating
+        "validation_summary": validation_summary, # Aggregate confidence telemetry across all attempts
+        "rule_frequency": rule_frequency, # Aggregate validation rule failure telemetry across all attempts
+        "attempts": validation_attempts # Historical validation attempt snapshots
     }
 
     with open(filename, "w") as f:
