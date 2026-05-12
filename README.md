@@ -1,5 +1,3 @@
-this is in github mind you. Like this?
-
 ## AI-Driven QA Test Planner
 
 ## Overview
