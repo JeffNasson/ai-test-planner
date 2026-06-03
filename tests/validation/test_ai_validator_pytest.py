@@ -1,32 +1,22 @@
 import pytest
+import copy
 
 from framework.validation.ai_validator import validate_test_cases
+from tests.fixtures.validator_fixtures import valid_test_case
 
 
 # Valid login should receive HIGH confidence.
-def test_valid_login_is_high_confidence():
+def test_valid_login_is_high_confidence(valid_test_case):
 
     # Arrange
-    test_cases = [
-        {
-            "title": "Valid login",
-            "steps": ["Go to page", "Enter creds", "Click login"],
-            "expected": "User logs in",
-            "assertion": {
-                "type": "url_contains",
-                "value": "/secure",
-                "locator": ""
-            },
-            "type": "positive"
-        }
-    ]
+    test_case = copy.deepcopy(valid_test_case)
 
     # Act
-    results = validate_test_cases(test_cases)
+    results = validate_test_cases([test_case])
 
     # Assert
     assert results[0]["confidence"] == "HIGH"
-    assert results[0]["valid"] == True
+    assert results[0]["valid"] is True
 
 
 
@@ -78,59 +68,56 @@ def test_missing_required_fields_are_rejected(test_case):
     results = validate_test_cases([test_case])
 
     # Assert
-    assert results[0]["valid"] == False
+    assert results[0]["valid"] is False
 
 
 
 # Empty steps array should fail validation
-def test_empty_steps_are_rejected():
+def test_empty_steps_are_rejected(valid_test_case):
+
     # Arrange
-    test_cases = [
-        {
-            "title": "Valid login",
-            "steps": [],
-            "expected": "User logs in",
-            "assertion": {
-                "type": "url_contains",
-                "value": "/secure",
-                "locator": ""
-            },
-            "type": "positive"
-        }
-    ]
+    test_case = copy.deepcopy(valid_test_case)
+    test_case["steps"] = []
 
     # Act
-    results = validate_test_cases(test_cases)
+    results = validate_test_cases([test_case])
 
     # Assert
-    assert results[0]["valid"] == False
+    assert results[0]["valid"] is False
     assert any(
         issue["rule"] == "NO_STEPS" for issue in results[0]["issues"]["critical"]
     )
 
 
 # Weak assertions reduce confidence
-def test_weak_assertion_reduces_confidence():
+def test_weak_assertion_reduces_confidence(valid_test_case):
+
     # Arrange
-    test_cases = [
-        {
-            "title": "Valid login",
-            "steps": ["Go to page", "Enter creds", "Click login"],
-            "expected": "User logs in",
-            "assertion": {
-                "type": "text_present",
-                "value": "a",
-                "locator": "#flash"
-            },
-            "type": "positive"
-        }
-    ]
+    test_case = copy.deepcopy(valid_test_case)
+    test_case["assertion"]["value"] = "a"
 
     # Act
-    results = validate_test_cases(test_cases)
+    results = validate_test_cases([test_case])
 
     # Assert
     assert results[0]["confidence"] == "MEDIUM"
     assert any(
         issue["rule"] == "ASSERTION_LENGTH" for issue in results[0]["issues"]["warning"]
+    )
+
+# text_present assertions require a locator
+def test_missing_locator_reduces_confidence(valid_test_case):
+    
+    # Arrange
+    test_case = copy.deepcopy(valid_test_case)
+    test_case["assertion"]["type"] = "text_present"
+    test_case["assertion"]["locator"] = ""
+
+    # Act
+    results = validate_test_cases([test_case])
+
+    # Assert
+    assert results[0]["confidence"] == "MEDIUM"
+    assert any(
+        issue["rule"] == "MISSING_LOCATOR" for issue in results[0]["issues"]["warning"]
     )
