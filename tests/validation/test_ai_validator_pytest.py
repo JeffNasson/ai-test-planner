@@ -2,7 +2,6 @@ import pytest
 import copy
 
 from framework.validation.ai_validator import validate_test_cases
-from tests.fixtures.validator_fixtures import valid_test_case
 
 
 # Valid login should receive HIGH confidence.
@@ -107,7 +106,7 @@ def test_weak_assertion_reduces_confidence(valid_test_case):
 
 # text_present assertions require a locator
 def test_missing_locator_reduces_confidence(valid_test_case):
-    
+
     # Arrange
     test_case = copy.deepcopy(valid_test_case)
     test_case["assertion"]["type"] = "text_present"
