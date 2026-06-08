@@ -15,3 +15,9 @@ def root():
 def validate_tests(payload: dict):
    results = validate(payload)
    return results
+
+# Receive spec 
+@app.post("/generate-tests")
+def generate_tests(payload: dict):
+    # For now, just return the received payload
+    return {"received_spec": payload}
