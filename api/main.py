@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from framework.services.validation_service import validate
+from framework.services.spec_generation_service import spec_generation_service
 
 app = FastAPI()
 
@@ -19,5 +20,5 @@ def validate_tests(payload: dict):
 # Receive spec 
 @app.post("/generate-tests")
 def generate_tests(payload: dict):
-    # For now, just return the received payload
-    return {"received_spec": payload}
+    results = spec_generation_service(payload)
+    return results

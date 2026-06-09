@@ -6,6 +6,7 @@ def validate(payload: dict):
 
     results = validate_test_cases(test_cases)
 
+    # Downstream services can listen for this event
     publish_event("ValidationCompleted", results)
 
     return results 
