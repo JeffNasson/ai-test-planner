@@ -5,13 +5,13 @@
 import json
 from orchestrator.pipeline import break_down_task
 
-def generate_from_requirements(requirements: list):
+def generate_from_requirements(requirements: list, feedback: str = ""):
     
     # Strip array list
     task = "\n".join(requirements)
 
-    # Run AI prompt and sanitize JSON response
-    results = break_down_task(task)
+    # Run AI prompt, sanitize JSON response, and produce feedback string for prompt if needed
+    results = break_down_task(task, feedback)
 
     # Transform back to JSON to satisfy service requirements
     data = json.loads(results)
