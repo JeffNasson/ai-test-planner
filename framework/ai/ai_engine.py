@@ -71,7 +71,7 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
 
         Fix all listed issues from the previous attempt. Do not repeat them: 
         {feedback}
-        Generate imrpoved test cases.
+        Generate improved test cases.
 
         """,
         max_output_tokens=450
