@@ -42,6 +42,9 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
         }}
 
         Rules:
+        - Use the supplied Domain and Focus Areas when generating test cases.
+        - Ensure the positive, negative, and edge cases cover the identified focus areas when applicable.
+        - Prioritize the supplied Focus Areas over generic test generation.
         - Exactly 3 test cases
         - One must be positive
         - One must be negative
