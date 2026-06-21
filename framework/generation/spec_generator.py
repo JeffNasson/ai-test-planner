@@ -14,15 +14,20 @@ def build_requirement_prompt(requirement: str, strategy: dict) -> str:
     )
 
     return f"""
+Recommended Coverage: 
+{focus_areas}
+
+The generated positive, negative, and edge cases should collectively cover these focus areas whenever possible.
+    
 Requirement:
-    {requirement}
+{requirement}
 
 Domain:
-    {strategy["domain"]}
+{strategy["domain"]}
 
 Focus Areas:
-    {focus_areas}
-    """
+{focus_areas}
+"""
 
 
 # Generate test cases using AI Prompt
@@ -39,12 +44,17 @@ def generate_from_requirements(requirements: list, feedback: str = ""):
     
     task = "\n\n".join(enriched_requirements) 
 
-    print("\n === GENERATED TASK ====")
+    print("\n ==== GENERATED TASK ====")
     print(task)
     print("======== \n")
 
+
     # Run AI prompt, sanitize JSON response, and produce feedback string for prompt if needed
     results = break_down_task(task, feedback)
+
+    print("\n=== RAW AI RESPONSE ===")
+    print(results)
+    print("=======================\n")
 
     # Transform back to JSON to satisfy service requirements
     data = json.loads(results)
