@@ -26,10 +26,7 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
                     "title": "short test case name",
                     "url": "https://www.example.com/login",
                     "type": "positive, negative, or edge",
-                    "inputs": {{
-                        "username": "string",
-                        "password": "string"
-                    }},
+                    "inputs": {{}},
                     "steps": ["step 1","step 2","step 3"],
                     "expected": "expected result of test case",
                     "assertion": {{
@@ -43,6 +40,7 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
 
         Rules:
         - Use the supplied Domain and Focus Areas when generating test cases.
+        - Inputs should contain fields relevant to the supplied requirement and domain.
         - Ensure the positive, negative, and edge cases cover the identified focus areas when applicable.
         - Prioritize the supplied Focus Areas over generic test generation.
         - Exactly 3 test cases
@@ -51,23 +49,14 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
         - One must be an edge case
         - Each test case can have up to a maximum of 3 steps
         - Assertion must describe what is checked and match actual system behavior
-            - Empty fields -> check for "Your username is invalid!"
-            - Use '#flash' as the locator for error messages on this page
         - Steps must be clear user actions in one sentence each
         - Expected result field must be one short sentence describing the ideal behavior of the test case
             - Empty fields -> "User should see required field validation"
         - Inputs must match the test type:
-            - Positive -> valid credentials
-            - Negative -> invalid credentials
             - Edge -> empty or boundary values
-        - For the login page https://the-internet.herokuapp.com/login:
-            - Success login redirects to "/secure"
-            - User "/secure" for url_contains assertions
         - Each test case must have a unique and correct assertion value
         - Edge cases (empty fields) must not reuse invalid credential messages
         - Use realistic messages for each scenario based on actual system behavior:
-            - Invalid login -> "Your username is invalid!"
-            - Empty fields -> "Your username is invalid!" (test site limitation, but should be categorized as edge case)
         - No extra text outside JSON
 
         Scenario: {task}
@@ -77,7 +66,7 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
         Generate improved test cases.
 
         """,
-        max_output_tokens=450
+        max_output_tokens=800
     )
 
     print("Done breaking task down!")
