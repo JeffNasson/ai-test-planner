@@ -1,3 +1,12 @@
+# Full flow
+# Requirement/Spec string is received
+# Loop through DOMAINS searching for KEYWORDS
+# If any KEYWORDS match with a DOMAIN return that DOMAINS STRATEGY dictionary which can now be used in generation prompt
+
+# Current issue(s):
+#   1. If the same keyword is shared between domains, whichever domain that is evaluated first wins and gets the test
+#       a. Fix idea: Implement a weighted scoring system so the most relevant domain is selected
+
 from copy import deepcopy
 
 AUTH_STRATEGY = {
@@ -18,15 +27,6 @@ AUTH_KEYWORDS = [
     "authorization"
 ]
 
-
-PAYMENT_KEYWORDS = [
-    "payment",
-    "transfer",
-    "transaction",
-    "withdraw",
-    "deposit"
-]
-
 PAYMENT_STRATEGY = {
     "domain": "payments",
     "focus_areas": [
@@ -37,6 +37,34 @@ PAYMENT_STRATEGY = {
     ]
 }
 
+PAYMENT_KEYWORDS = [
+    "payment",
+    "transfer",
+    "transaction",
+    "withdraw",
+    "deposit"
+]
+
+EVENT_STRATEGY = {
+    "domain": "iot_events",
+    "focus_areas": [
+        "schema_validation",
+        "missing_fields",
+        "boundary_values",
+        "event_ordering",
+        "duplicate_events"
+    ]
+}
+
+EVENT_KEYWORDS = [
+    "sensor",
+    "device",
+    "event",
+    "telemetry",
+    "temperature",
+    "humidity"
+]
+
 DOMAINS = {
     "authentication": {
         "keywords": AUTH_KEYWORDS,
@@ -45,6 +73,10 @@ DOMAINS = {
     "payments": {
         "keywords": PAYMENT_KEYWORDS,
         "strategy": PAYMENT_STRATEGY
+    },
+    "event":{
+        "keywords": EVENT_KEYWORDS,
+        "strategy": EVENT_STRATEGY
     }
 }
 
