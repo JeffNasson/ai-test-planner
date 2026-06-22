@@ -27,5 +27,5 @@ def generate_automated_tests(payload: dict):
 # Receive spec and generate exploratory tests
 @app.post("/generate-exploratory-tests")
 def generate_exploratory_tests(payload: dict):
-    results = generate_exploratory_scenarios(payload)
+    results = generate_exploratory_scenarios(payload["requirements"])
     return results
