@@ -54,7 +54,7 @@ def generate_from_requirements(requirements: list, feedback: str = "") -> dict:
         # Analyze spec string for keywords and determine if downstream behaviors need to be triggered and return a list of downstream behaviors
         downstream_behaviors = get_expected_downstream_behaviors(requirement)
 
-        # Build prompt for AI using spec requirement and domain strategy dict
+        # Build prompt for AI using spec requirement str, domain strategy dict, and downstream_behaviors list
         prompt = build_requirement_prompt(requirement, strategy, downstream_behaviors)
         
         # Append the prompt to enriched_requirements list
