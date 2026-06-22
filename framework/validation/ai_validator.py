@@ -56,7 +56,8 @@ def validate_test_cases(test_cases):
         
         # Rule 4: Edge case logic check (-15 points for edge cases reusing negative expectations)
         if test_case.get("type") == "edge":
-            if "invalid" in test_case.get("expected", "").lower(): # This checks if the test case is categorized as an edge case and if the expected result contains the word 'invalid', which would indicate that it is not properly categorized as an edge case.
+            expected = test_case.get("expected", "").lower()
+            if ("invalid credentials" in expected or "required field validation" in expected): # This checks if the test case is categorized as an edge case and if the expected result contains the words 'invalid credentials' or 'required field validation', which would indicate that it is not properly categorized as an edge case.
                 issues["critical"].append({
                     "rule": "EDGE_CASE_NEGATIVE_REFUSE",
                     "field": "expected",
@@ -65,7 +66,54 @@ def validate_test_cases(test_cases):
                 })
                 score -= 15
                 critical_failure = True 
-        
+
+        # Rule 4b: Edge case must contain a boundary-like value (-15 points if no boundary indicators found)
+        if test_case.get("type") == "edge":
+            inputs = test_case.get("inputs", {})
+            boundary_found = False
+            BOUNDARY_VALUES = {
+                0,
+                1,
+                -1,
+                255,
+                256,
+                999999
+            }
+
+            for value in inputs.values():
+                # Numeric boundary checks
+                if isinstance(value, (int, float)) and value in BOUNDARY_VALUES:
+                    boundary_found = True
+                    break
+
+                # String boundary checks
+                if isinstance(value, str):
+                    value_lower = value.lower()
+                    if value_lower in {
+                        "0",
+                        "1",
+                        "-1",
+                        "255",
+                        "256",
+                        "999999",
+                        "min",
+                        "max"
+                    }:
+
+                        boundary_found = True
+                        break
+
+            if not boundary_found:
+                issues["critical"].append({
+                    "rule": "EDGE_CASE_REQUIRES_BOUNDARY",
+                    "field": "inputs",
+                    "severity": "critical",
+                    "message": "Edge case does not contain a recognizable boundary value"
+                })
+                score -= 15
+                critical_failure = True
+
+
         # Rule 5: Weak assertion value (20-25 points for poor quality assertions)
         value = assertion.get("value","").strip()
         

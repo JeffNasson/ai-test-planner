@@ -39,7 +39,8 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
         }}
 
         Rules:
-        - Use the supplied Domain and Focus Areas when generating test cases.
+        - Use the supplied Domain, Focus Areas, and Downstream Behaviors when generating test cases.
+        - Expected results should incorporate relevant downstream behaviors when appropriate.
         - Inputs should contain fields relevant to the supplied requirement and domain.
         - Ensure the positive, negative, and edge cases cover the identified focus areas when applicable.
         - Prioritize the supplied Focus Areas over generic test generation.
@@ -56,6 +57,7 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
             - Edge -> empty or boundary values
         - Each test case must have a unique and correct assertion value
         - Edge cases (empty fields) must not reuse invalid credential messages
+        - Edge cases must test boundary conditions or unusual but potentially valid inputs and must not reuse the same expected result or assertion as the negative test.
         - Use realistic messages for each scenario based on actual system behavior:
         - No extra text outside JSON
 
