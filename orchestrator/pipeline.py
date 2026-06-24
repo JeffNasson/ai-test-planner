@@ -44,10 +44,10 @@ def run_default_tests():
 
 
 # Sanitizes JSON response, returns cleaned JSON string. Has additional debugging output to help troubleshoot issues with AI responses.
-def break_down_task(task: str, feedback: str = "") -> str:
+def break_down_task(task: str, feedback: str = "", mode: str = "automated") -> str:
     print("Breaking task down...")
 
-    raw_text = generate_test_cases(task, feedback) # pass feedback into AI generator for iterative improvement
+    raw_text = generate_test_cases(task, feedback, mode) # pass feedback into AI generator for iterative improvement
 
     if DEBUG:
         print("\n--- RAW AI RESPONSE ---\n")

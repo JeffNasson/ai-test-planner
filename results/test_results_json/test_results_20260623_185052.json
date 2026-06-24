@@ -1,0 +1,31 @@
+{
+    "results": [
+        {
+            "status": "FAIL",
+            "title": "Valid Login Attempt"
+        },
+        {
+            "status": "PASS",
+            "title": "Invalid Login Attempt with Wrong Password"
+        },
+        {
+            "status": "PASS",
+            "title": "Empty Fields Handling"
+        },
+        {
+            "status": "PASS",
+            "title": "Session Expiration Handling"
+        },
+        {
+            "status": "PASS",
+            "title": "Repeated Authentication Failures"
+        }
+    ],
+    "metrics": {
+        "total": 5,
+        "passed": 4,
+        "failed": 1,
+        "errors": 0,
+        "pass_rate": 80.0
+    }
+}

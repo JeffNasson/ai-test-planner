@@ -1,0 +1,14 @@
+=== TEST RESULTS ===
+
+FAIL: Valid Login Attempt
+PASS: Invalid Login Attempt with Wrong Password
+PASS: Empty Fields Handling
+PASS: Session Expiration Handling
+PASS: Repeated Authentication Failures
+
+--- METRICS ---
+Total: 5
+Passed: 4
+Failed: 1
+Errors: 0
+Pass Rate: 80.00%

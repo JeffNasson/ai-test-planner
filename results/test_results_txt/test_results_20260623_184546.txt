@@ -1,0 +1,14 @@
+=== TEST RESULTS ===
+
+PASS: Validate unsuccessful login with empty fields
+FAIL: Test account lockout after multiple failed attempts
+FAIL: Check session expiration after inactivity
+PASS: Test login with malformed credentials
+FAIL: Test multi-tab session behavior
+
+--- METRICS ---
+Total: 5
+Passed: 2
+Failed: 3
+Errors: 0
+Pass Rate: 40.00%

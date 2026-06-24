@@ -7,19 +7,53 @@ MODEL = "gpt-4o-mini"
 
 
 # Houses prompting logic
-def generate_test_cases(task: str, feedback: str = "") -> str:
+def generate_test_cases(task: str, feedback: str = "", mode: str = "automated") -> str:
     client = OpenAI()
-    response = client.responses.create(
-        model=MODEL,
-        input = f"""
-        You are a QA engineer. 
 
+    if mode == "exploratory":
+        instructions = """
+        You are a senior QA engineer.
+        Generate exploratory test cases.
+        Return only valid JSON in this format: {{
+            "test_cases":[
+                {{
+                    "title": "short test case name",
+                    "url": "https://www.example.com/login",
+                    "type": "exploratory",
+                    "inputs": {{}},
+                    "steps": ["step 1","step 2","step 3"],
+                    "expected": "expected result of test case",
+                    "assertion": {{
+                        "type": "url_contains | element_visible | text_present",
+                        "value": "what to check",
+                        "locator": "optional css selector"
+                    }}
+                }}
+            ]
+        }}
+
+        Rules:
+        - Generate 3-5 exploratory test cases.
+        - Use supplied Focus Areas and Exploratory Themes.
+        - Explore unusual, unexpected, and edge behaviors.
+        - Include title.
+        - Include type = exploratory.
+        - Include url.
+        - Include inputs.
+        - Include steps.
+        - Include expected result.
+        - Include assertion.
+        - Assertion value must not be empty.
+        - Return valid JSON only.
+    """
+        
+    else:
+        instructions = """
+        You are a senior QA engineer.
         Given the following feature or scenario, generate exactly 3 test cases.
-
         1 positive test case (valid behavior)
         1 negative test case (invalid behavior)
         1 edge case (boundary or unusual condition)
-
         Return only valid JSON in this format: {{
             "test_cases":[
                 {{
@@ -60,13 +94,18 @@ def generate_test_cases(task: str, feedback: str = "") -> str:
         - Edge cases must test boundary conditions or unusual but potentially valid inputs and must not reuse the same expected result or assertion as the negative test.
         - Use realistic messages for each scenario based on actual system behavior:
         - No extra text outside JSON
+        """
+
+    response = client.responses.create(
+        model=MODEL,
+        input = f"""
+        {instructions}
 
         Scenario: {task}
+        Fix all listed issues from the previous attempt:
 
-        Fix all listed issues from the previous attempt. Do not repeat them: 
         {feedback}
         Generate improved test cases.
-
         """,
         max_output_tokens=800
     )

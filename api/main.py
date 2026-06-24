@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from framework.services.validation_service import validate
 from framework.services.spec_generation_service import spec_generation_service
-from framework.generation.exploratory_generator import generate_exploratory_scenarios
+from framework.services.exploratory_generation_service import exploratory_generation_service
 
 app = FastAPI()
 
@@ -27,5 +27,5 @@ def generate_automated_tests(payload: dict):
 # Receive spec and generate exploratory tests
 @app.post("/generate-exploratory-tests")
 def generate_exploratory_tests(payload: dict):
-    results = generate_exploratory_scenarios(payload["requirements"])
+    results = exploratory_generation_service(payload)
     return results
